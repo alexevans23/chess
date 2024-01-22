@@ -9,7 +9,7 @@ import java.util.Arrays;
  * signature of the existing methods.
  */
 public class ChessBoard {
-   private ChessPiece[][] squares = new ChessPiece[8][8];
+   private final ChessPiece[][] squares = new ChessPiece[8][8];
     public ChessBoard() {
         
     }
@@ -85,18 +85,28 @@ public class ChessBoard {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessBoard that = (ChessBoard) o;
-        return Arrays.equals(squares, that.squares);
+        return Arrays.deepEquals(squares, that.squares);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(squares);
+        return Arrays.deepHashCode(squares);
     }
 
     @Override
     public String toString() {
-        return "ChessBoard{" +
-                "squares=" + Arrays.toString(squares) +
-                '}';
+        StringBuilder sb = new StringBuilder();
+        for (ChessPiece[] square : squares) {
+            for (ChessPiece chessPiece : square) {
+                if (chessPiece == null) {
+                    sb.append("| ");
+                } else {
+                    sb.append("|").append(chessPiece.getSymbol());
+                }
+            }
+            sb.append("|\n");
+        }
+        return "ChessBoard{\n" + sb.toString() + '}';
     }
+
 }

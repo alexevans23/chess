@@ -119,8 +119,49 @@ public class ChessPiece {
         }
     }
     private void pawnMove(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
-        int[][] directions = {{}, {}, {}, {}};
+        System.out.println("PawnMove - Position: " + myPosition + ", Color: " + this.getTeamColor());
+
+        int direction = this.getTeamColor() == ChessGame.TeamColor.WHITE ? 1 : -1;
+        int nextRow = myPosition.getRow() + direction;
+        if (validMove(nextRow, myPosition.getColumn())) {
+            ChessPosition newPosition = new ChessPosition(nextRow, myPosition.getColumn());
+            if (board.getPiece(newPosition) == null) {
+                addPawnMove(board, myPosition, newPosition, moves);
+            }
+        }
+        if ((this.getTeamColor() == ChessGame.TeamColor.WHITE && myPosition.getRow() == 2) ||
+                (this.getTeamColor() == ChessGame.TeamColor.BLACK && myPosition.getRow() == 7)) {
+            int twoRowsAhead = myPosition.getRow() + 2 * direction;
+            ChessPosition twoSquaresPosition = new ChessPosition(twoRowsAhead, myPosition.getColumn());
+            if (board.getPiece(new ChessPosition(nextRow, myPosition.getColumn())) == null && // Check if the first square is empty
+                    board.getPiece(twoSquaresPosition) == null) { // Check if the second square is empty
+                addPawnMove(board, myPosition, twoSquaresPosition, moves);
+            }
+        }
+        int[] captureCols = {myPosition.getColumn() - 1, myPosition.getColumn() + 1};
+        for (int col : captureCols) {
+            if (validMove(nextRow, col)) {
+                ChessPosition capturePosition = new ChessPosition(nextRow, col);
+                ChessPiece pieceAtCapturePosition = board.getPiece(capturePosition);
+                if (pieceAtCapturePosition != null && pieceAtCapturePosition.getTeamColor() != this.getTeamColor()) {
+                    addPawnMove(board, myPosition, capturePosition, moves);  // This should handle promotion
+                }
+            }
+        }
     }
+    private void addPawnMove(ChessBoard board, ChessPosition myPosition, ChessPosition newPosition, Collection<ChessMove> moves) {
+        boolean isPromotionRow = (this.getTeamColor() == ChessGame.TeamColor.WHITE && newPosition.getRow() == 8) ||
+                (this.getTeamColor() == ChessGame.TeamColor.BLACK && newPosition.getRow() == 1);
+
+        if (isPromotionRow) {
+            for (ChessPiece.PieceType promotionType : new ChessPiece.PieceType[]{ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.ROOK, ChessPiece.PieceType.BISHOP, ChessPiece.PieceType.KNIGHT}) {
+                moves.add(new ChessMove(myPosition, newPosition, promotionType));
+            }
+        } else {
+            moves.add(new ChessMove(myPosition, newPosition, null));
+        }
+    }
+
     private void addMovesInDirection(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves, int rowDirection, int colDirection) {
         int row = myPosition.getRow();
         int col = myPosition.getColumn();

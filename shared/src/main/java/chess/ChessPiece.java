@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 
 /**
@@ -56,7 +57,7 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> moves = new ArrayList<>();
+        Collection<ChessMove> moves = new HashSet<>();
 
         switch (this.getPieceType()) {
             case KING -> kingMoves(board, myPosition, moves);
@@ -119,8 +120,6 @@ public class ChessPiece {
         }
     }
     private void pawnMove(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
-        System.out.println("PawnMove - Position: " + myPosition + ", Color: " + this.getTeamColor());
-
         int direction = this.getTeamColor() == ChessGame.TeamColor.WHITE ? 1 : -1;
         int nextRow = myPosition.getRow() + direction;
         if (validMove(nextRow, myPosition.getColumn())) {
@@ -133,8 +132,7 @@ public class ChessPiece {
                 (this.getTeamColor() == ChessGame.TeamColor.BLACK && myPosition.getRow() == 7)) {
             int twoRowsAhead = myPosition.getRow() + 2 * direction;
             ChessPosition twoSquaresPosition = new ChessPosition(twoRowsAhead, myPosition.getColumn());
-            if (board.getPiece(new ChessPosition(nextRow, myPosition.getColumn())) == null && // Check if the first square is empty
-                    board.getPiece(twoSquaresPosition) == null) { // Check if the second square is empty
+            if (board.getPiece(new ChessPosition(nextRow, myPosition.getColumn())) == null && board.getPiece(twoSquaresPosition) == null) {
                 addPawnMove(board, myPosition, twoSquaresPosition, moves);
             }
         }
@@ -144,7 +142,7 @@ public class ChessPiece {
                 ChessPosition capturePosition = new ChessPosition(nextRow, col);
                 ChessPiece pieceAtCapturePosition = board.getPiece(capturePosition);
                 if (pieceAtCapturePosition != null && pieceAtCapturePosition.getTeamColor() != this.getTeamColor()) {
-                    addPawnMove(board, myPosition, capturePosition, moves);  // This should handle promotion
+                    addPawnMove(board, myPosition, capturePosition, moves);
                 }
             }
         }
@@ -154,7 +152,7 @@ public class ChessPiece {
                 (this.getTeamColor() == ChessGame.TeamColor.BLACK && newPosition.getRow() == 1);
 
         if (isPromotionRow) {
-            for (ChessPiece.PieceType promotionType : new ChessPiece.PieceType[]{ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.ROOK, ChessPiece.PieceType.BISHOP, ChessPiece.PieceType.KNIGHT}) {
+            for (ChessPiece.PieceType promotionType : new ChessPiece.PieceType[]{ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.ROOK, ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.BISHOP}) {
                 moves.add(new ChessMove(myPosition, newPosition, promotionType));
             }
         } else {

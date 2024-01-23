@@ -56,9 +56,90 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return new ArrayList<>();
+        Collection<ChessMove> moves = new ArrayList<>();
+
+        switch (this.getPieceType()) {
+            case KING -> kingMoves(board, myPosition, moves);
+            case QUEEN -> queenMoves(board, myPosition, moves);
+            case BISHOP -> bishopMoves(board, myPosition, moves);
+            case KNIGHT -> knightMove(board, myPosition, moves);
+            case ROOK -> rookMove(board, myPosition, moves);
+            case PAWN -> pawnMove(board, myPosition, moves);
+        }
+        return moves;
+    }
+    private void kingMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
+        int[][] directions = {{1,1},{1,0},{0,1},{-1,-1}, {-1,0}, {0,-1}, {-1,1}, {1,-1}};
+        for (int[] direction : directions) {
+            int row = myPosition.getRow() + direction[0];
+            int col = myPosition.getColumn() + direction[1];
+            if (validMove(row, col)) {
+                ChessPosition newPosition = new ChessPosition(row, col);
+                ChessPiece pieceAtNewPosition = board.getPiece(newPosition);
+                if (pieceAtNewPosition == null) {
+                    moves.add(new ChessMove(myPosition, newPosition, null));
+                } else if (pieceAtNewPosition.getTeamColor() != this.getTeamColor()) {
+                    moves.add(new ChessMove(myPosition, newPosition, null));
+                }
+            }
+        }
+    }
+    private void queenMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
+        int[][] directions = {{1,1},{1,0},{0,1},{-1,-1},{-1,0},{0,-1},{-1,1},{1,-1}};
+        for (int[] direction : directions) {
+            addMovesInDirection(board, myPosition, moves, direction[0], direction[1]);
+        }
+    }
+    private void bishopMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
+        int[][] directions = {{1,1},{-1,1},{-1,-1},{1,-1}};
+        for (int[] direction : directions) {
+            addMovesInDirection(board, myPosition, moves, direction[0], direction[1]);
+        }
+    }
+    private void knightMove(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
+        int[][] coordinates = {{1,2},{}, {}, {}};
+    }
+    private void rookMove(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
+        int[][] directions = {{1,0}, {0,1}, {-1,0}, {0,-1}};
+        for (int[] direction : directions) {
+            addMovesInDirection(board, myPosition, moves, direction[0], direction[1]);
+        }
+    }
+    private void pawnMove(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
+
+        int[][] coordinates = {{}, {}, {}, {}};
+
+
+    }
+    private void addMovesInDirection(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves, int rowDirection, int colDirection) {
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+
+        while (true) {
+            row += rowDirection;
+            col += colDirection;
+
+            if (!validMove(row, col)) {
+                break;
+            }
+
+            ChessPosition newPosition = new ChessPosition(row, col);
+            ChessPiece pieceAtNewPosition = board.getPiece(newPosition);
+
+            if (pieceAtNewPosition == null) {
+                moves.add(new ChessMove(myPosition, newPosition, null));
+            } else {
+                if (pieceAtNewPosition.getTeamColor() != this.getTeamColor()) {
+                    moves.add(new ChessMove(myPosition, newPosition, null));
+                }
+                break;
+            }
+        }
     }
 
+    private boolean validMove(int row, int col) {
+        return row >= 1 && row <= 8 && col >= 1 && col <= 8;
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

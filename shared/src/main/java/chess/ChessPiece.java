@@ -69,7 +69,7 @@ public class ChessPiece {
         return moves;
     }
     private void kingMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
-        int[][] directions = {{1,1},{1,0},{0,1},{-1,-1}, {-1,0}, {0,-1}, {-1,1}, {1,-1}};
+        int[][] directions = {{1,1},{1,0},{0,1},{-1,-1},{-1,0},{0,-1},{-1,1},{1,-1}};
         for (int[] direction : directions) {
             int row = myPosition.getRow() + direction[0];
             int col = myPosition.getColumn() + direction[1];
@@ -97,19 +97,29 @@ public class ChessPiece {
         }
     }
     private void knightMove(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
-        int[][] coordinates = {{1,2},{}, {}, {}};
+        int[][] directions = {{1,2},{2,1},{-1,2},{-2,1},{-1,-2},{-2,-1},{1,-2},{2,-1}};
+        for (int[] direction : directions) {
+            int row = myPosition.getRow() + direction[0];
+            int col = myPosition.getColumn() + direction[1];
+            if (validMove(row, col)) {
+                ChessPosition newPosition = new ChessPosition(row, col);
+                ChessPiece pieceAtNewPosition = board.getPiece(newPosition);
+                if (pieceAtNewPosition == null) {
+                    moves.add(new ChessMove(myPosition, newPosition, null));
+                } else if (pieceAtNewPosition.getTeamColor() != this.getTeamColor()) {
+                    moves.add(new ChessMove(myPosition, newPosition, null));
+                }
+            }
+        }
     }
     private void rookMove(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
-        int[][] directions = {{1,0}, {0,1}, {-1,0}, {0,-1}};
+        int[][] directions = {{1,0},{0,1},{-1,0},{0,-1}};
         for (int[] direction : directions) {
             addMovesInDirection(board, myPosition, moves, direction[0], direction[1]);
         }
     }
     private void pawnMove(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
-
-        int[][] coordinates = {{}, {}, {}, {}};
-
-
+        int[][] directions = {{}, {}, {}, {}};
     }
     private void addMovesInDirection(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves, int rowDirection, int colDirection) {
         int row = myPosition.getRow();

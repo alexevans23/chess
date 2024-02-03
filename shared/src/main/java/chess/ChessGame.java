@@ -1,6 +1,8 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -12,10 +14,12 @@ public class ChessGame {
     //initialize the chessboard
     private ChessBoard board;
     private TeamColor teamTurn;
+    private Set<ChessMove> potentialMoves = new HashSet<>();
 
     public ChessGame() {
         this.board = new ChessBoard();
         this.teamTurn = TeamColor.WHITE;
+        board.resetBoard();
     }
 
     /**
@@ -100,7 +104,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        this.board = board;
     }
 
     /**

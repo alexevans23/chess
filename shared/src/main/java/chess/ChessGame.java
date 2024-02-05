@@ -15,7 +15,6 @@ public class ChessGame {
     //initialize the chessboard
     private ChessBoard board;
     private TeamColor teamTurn;
-    private Set<ChessMove> potentialMoves = new HashSet<>();
     private Stack<MoveHistory> moveHistory = new Stack<>();
 
     public ChessGame() {
@@ -29,7 +28,7 @@ public class ChessGame {
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return teamTurn;
     }
 
     /**
@@ -85,19 +84,23 @@ public class ChessGame {
         if (piece == null) {
             return null;
         }
+
         Set<ChessMove> validMoves = new HashSet<>();
-        Collection<ChessMove> potentialMoves = board.getPiece(startPosition).pieceMoves(board, startPosition);
+        Collection<ChessMove> potentialMoves = piece.pieceMoves(board, startPosition);
 
         for (ChessMove move : potentialMoves) {
             applyMove(move);
-            if (!isInCheck(teamTurn)) {
+            teamTurn = (teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+            if (!isInCheck((teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE)) {
                 validMoves.add(move);
             }
+            teamTurn = (teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
             undoLastMove();
         }
 
         return validMoves;
     }
+
     /**
      * Makes a move in a chess game
      *
@@ -142,6 +145,10 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition kingPosition = findKingPosition(teamColor);
+        if (kingPosition == null) {
+            System.out.println("King not found for " + teamColor);
+            return false;
+        }
         TeamColor opponentColor = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
@@ -166,9 +173,28 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (!isInCheck(teamColor)) {
+            return false;
+        }
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(position);
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    Collection<ChessMove> moves = piece.pieceMoves(board, position);
+                    for (ChessMove move : moves) {
+                        applyMove(move);
+                        boolean stillInCheck = isInCheck(teamColor);
+                        undoLastMove();
+                        if (!stillInCheck) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
     }
-
     /**
      * Determines if the given team is in stalemate, which here is defined as having
      * no valid moves
@@ -177,7 +203,21 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (isInCheck(teamColor)) {
+            return false;
+        }
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(position);
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    if (!validMoves(position).isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
     /**
      * Sets this game's chessboard with a given board

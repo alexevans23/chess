@@ -59,15 +59,14 @@ public class ChessGame {
             System.out.println("No moves to undo.");
             return;
         }
-
         MoveHistory lastMoveHistory = moveHistory.pop();
-        ChessMove lastMove = lastMoveHistory.getMove();
+        ChessMove lastMove = lastMoveHistory.move();
         ChessPiece movedPiece = board.getPiece(lastMove.getEndPosition());
         ChessPiece originalPiece = lastMoveHistory.wasPromotion() ?
                 new ChessPiece(movedPiece.getTeamColor(), ChessPiece.PieceType.PAWN) : movedPiece;
         board.addPiece(lastMove.getStartPosition(), originalPiece);
-        if (lastMoveHistory.getCapturedPiece() != null) {
-            board.addPiece(lastMove.getEndPosition(), lastMoveHistory.getCapturedPiece());
+        if (lastMoveHistory.capturedPiece() != null) {
+            board.addPiece(lastMove.getEndPosition(), lastMoveHistory.capturedPiece());
         } else {
             board.addPiece(lastMove.getEndPosition(), null);
         }

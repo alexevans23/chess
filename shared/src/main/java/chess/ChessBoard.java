@@ -72,14 +72,11 @@ public class ChessBoard {
         addPiece(new ChessPosition(1, 5), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING));
         addPiece(new ChessPosition(8, 5), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING));
     }
-
-
     public void clear() {
         for (ChessPiece[] square : squares) {
             Arrays.fill(square, null);
         }
     }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -87,12 +84,10 @@ public class ChessBoard {
         ChessBoard that = (ChessBoard) o;
         return Arrays.deepEquals(squares, that.squares);
     }
-
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(squares);
     }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -112,7 +107,6 @@ public class ChessBoard {
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
         ChessPiece movingPiece = getPiece(start);
-
         squares[start.getRow() - 1][start.getColumn() - 1] = null;
 
         if (move.getPromotionPiece() != null) {
@@ -121,5 +115,4 @@ public class ChessBoard {
             squares[end.getRow() - 1][end.getColumn() - 1] = movingPiece;
         }
     }
-
 }

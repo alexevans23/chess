@@ -82,22 +82,26 @@ public class ChessGame {
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = board.getPiece(startPosition);
         if (piece == null) {
+            System.out.println("No piece at startPosition: " + startPosition);
             return null;
         }
+        System.out.println("Evaluating valid moves for piece at " + startPosition + " (" + piece.getPieceType() + ")");
 
         Set<ChessMove> validMoves = new HashSet<>();
         Collection<ChessMove> potentialMoves = piece.pieceMoves(board, startPosition);
 
         for (ChessMove move : potentialMoves) {
+            System.out.println("Considering move: " + move);
             applyMove(move);
-            teamTurn = (teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
-            if (!isInCheck((teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE)) {
+            if (!isInCheck(teamTurn)) {
+                System.out.println("Move is valid: " + move);
                 validMoves.add(move);
+            } else {
+                System.out.println("Move leaves king in check, not valid: " + move);
             }
-            teamTurn = (teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
             undoLastMove();
         }
-
+        System.out.println("Total valid moves from position " + startPosition + ": " + validMoves.size());
         return validMoves;
     }
 
@@ -145,27 +149,32 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition kingPosition = findKingPosition(teamColor);
+        System.out.println("Checking if " + teamColor + " king at " + kingPosition + " is in check");
+
         if (kingPosition == null) {
             System.out.println("King not found for " + teamColor);
             return false;
         }
+
         TeamColor opponentColor = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
-                ChessPosition position = new ChessPosition(row + 1, col + 1);
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition position = new ChessPosition(row, col);
                 ChessPiece piece = board.getPiece(position);
                 if (piece != null && piece.getTeamColor() == opponentColor) {
-                    Collection<ChessMove> moves = piece.pieceMoves(board, position);
-                    for (ChessMove move : moves) {
+                    for (ChessMove move : piece.pieceMoves(board, position)) {
                         if (move.getEndPosition().equals(kingPosition)) {
+                            System.out.println("King is in check by " + piece.getPieceType() + " at " + position);
                             return true;
                         }
                     }
                 }
             }
         }
+        System.out.println(teamColor + " king is not in check.");
         return false;
     }
+
     /**
      * Determines if the given team is in checkmate
      *

@@ -51,11 +51,7 @@ public class ChessGame {
     public void applyMove(ChessMove move) {
         ChessPiece movingPiece = board.getPiece(move.getStartPosition());
         ChessPiece capturedPiece = board.getPiece(move.getEndPosition());
-
-        // Apply the move on the board
         board.applyMove(move);
-
-        // Track the move for potential undoing
         boolean wasPromotion = move.getPromotionPiece() != null;
         moveHistory.push(new MoveHistory(move, capturedPiece, wasPromotion));
     }
@@ -67,24 +63,16 @@ public class ChessGame {
 
         MoveHistory lastMoveHistory = moveHistory.pop();
         ChessMove lastMove = lastMoveHistory.getMove();
-        ChessPiece movedPiece = board.getPiece(lastMove.getEndPosition()); // The piece that was moved to the end position
-
-        // If the last move was a promotion, we need to revert the piece back to a pawn, otherwise, move back the original piece
+        ChessPiece movedPiece = board.getPiece(lastMove.getEndPosition());
         ChessPiece originalPiece = lastMoveHistory.wasPromotion() ?
                 new ChessPiece(movedPiece.getTeamColor(), ChessPiece.PieceType.PAWN) : movedPiece;
-
-        // Move the piece back to its start position
         board.addPiece(lastMove.getStartPosition(), originalPiece);
-
-        // Restore the captured piece, if there was one
         if (lastMoveHistory.getCapturedPiece() != null) {
             board.addPiece(lastMove.getEndPosition(), lastMoveHistory.getCapturedPiece());
         } else {
-            // Ensure the end position is cleared if no piece was captured
             board.addPiece(lastMove.getEndPosition(), null);
         }
     }
-
     /**
      * Gets a valid moves for a piece at the given location
      *
@@ -93,6 +81,10 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+        ChessPiece piece = board.getPiece(startPosition);
+        if (piece == null) {
+            return null;
+        }
         Set<ChessMove> validMoves = new HashSet<>();
         Collection<ChessMove> potentialMoves = board.getPiece(startPosition).pieceMoves(board, startPosition);
 
@@ -106,8 +98,6 @@ public class ChessGame {
 
         return validMoves;
     }
-
-
     /**
      * Makes a move in a chess game
      *
@@ -115,9 +105,24 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPosition start = move.getStartPosition();
+        ChessPiece movingPiece = board.getPiece(start);
+        if (movingPiece == null) {
+            throw new InvalidMoveException("No piece at the start position.");
+        }
+        if (movingPiece.getTeamColor() != teamTurn) {
+            throw new InvalidMoveException("It's not " + movingPiece.getTeamColor() + "'s turn.");
+        }
+        Collection<ChessMove> validMoves = validMoves(start);
+        if (validMoves == null || !validMoves.contains(move)) {
+            throw new InvalidMoveException("This move is not valid.");
+        }
+        applyMove(move);
+        teamTurn = (teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+        ChessPiece capturedPiece = board.getPiece(move.getEndPosition());
+        boolean wasPromotion = move.getPromotionPiece() != null;
+        moveHistory.push(new MoveHistory(move, capturedPiece, wasPromotion));
     }
-
     /**
      * Determines if the given team is in check
      *
@@ -127,7 +132,6 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         throw new RuntimeException("Not implemented");
     }
-
     /**
      * Determines if the given team is in checkmate
      *

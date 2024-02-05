@@ -22,6 +22,7 @@ public class ChessGame {
         this.board = new ChessBoard();
         this.teamTurn = TeamColor.WHITE;
         board.resetBoard();
+        this.moveHistory = new Stack<>();
     }
 
     /**

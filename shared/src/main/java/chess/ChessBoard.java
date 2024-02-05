@@ -11,7 +11,7 @@ import java.util.Arrays;
 public class ChessBoard {
    private final ChessPiece[][] squares = new ChessPiece[8][8];
     public ChessBoard() {
-        
+
     }
 
     /**
@@ -107,6 +107,19 @@ public class ChessBoard {
             sb.append("|\n");
         }
         return "ChessBoard{\n" + sb.toString() + '}';
+    }
+    public void applyMove(ChessMove move) {
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+        ChessPiece movingPiece = getPiece(start);
+
+        squares[start.getRow() - 1][start.getColumn() - 1] = null;
+
+        if (move.getPromotionPiece() != null) {
+            squares[end.getRow() - 1][end.getColumn() - 1] = new ChessPiece(movingPiece.getTeamColor(), move.getPromotionPiece());
+        } else {
+            squares[end.getRow() - 1][end.getColumn() - 1] = movingPiece;
+        }
     }
 
 }

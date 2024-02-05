@@ -3,6 +3,7 @@ package chess;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Stack;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -15,6 +16,7 @@ public class ChessGame {
     private ChessBoard board;
     private TeamColor teamTurn;
     private Set<ChessMove> potentialMoves = new HashSet<>();
+    private Stack<MoveHistory> moveHistory = new Stack<>();
 
     public ChessGame() {
         this.board = new ChessBoard();

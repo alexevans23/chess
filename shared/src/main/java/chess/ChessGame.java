@@ -48,6 +48,42 @@ public class ChessGame {
         WHITE,
         BLACK
     }
+    public void applyMove(ChessMove move) {
+        ChessPiece movingPiece = board.getPiece(move.getStartPosition());
+        ChessPiece capturedPiece = board.getPiece(move.getEndPosition());
+
+        // Apply the move on the board
+        board.applyMove(move);
+
+        // Track the move for potential undoing
+        boolean wasPromotion = move.getPromotionPiece() != null;
+        moveHistory.push(new MoveHistory(move, capturedPiece, wasPromotion));
+    }
+    public void undoLastMove() {
+        if (moveHistory.isEmpty()) {
+            System.out.println("No moves to undo.");
+            return;
+        }
+
+        MoveHistory lastMoveHistory = moveHistory.pop();
+        ChessMove lastMove = lastMoveHistory.getMove();
+        ChessPiece movedPiece = board.getPiece(lastMove.getEndPosition()); // The piece that was moved to the end position
+
+        // If the last move was a promotion, we need to revert the piece back to a pawn, otherwise, move back the original piece
+        ChessPiece originalPiece = lastMoveHistory.wasPromotion() ?
+                new ChessPiece(movedPiece.getTeamColor(), ChessPiece.PieceType.PAWN) : movedPiece;
+
+        // Move the piece back to its start position
+        board.addPiece(lastMove.getStartPosition(), originalPiece);
+
+        // Restore the captured piece, if there was one
+        if (lastMoveHistory.getCapturedPiece() != null) {
+            board.addPiece(lastMove.getEndPosition(), lastMoveHistory.getCapturedPiece());
+        } else {
+            // Ensure the end position is cleared if no piece was captured
+            board.addPiece(lastMove.getEndPosition(), null);
+        }
+    }
 
     /**
      * Gets a valid moves for a piece at the given location
@@ -57,8 +93,20 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        Set<ChessMove> validMoves = new HashSet<>();
+        Collection<ChessMove> potentialMoves = board.getPiece(startPosition).pieceMoves(board, startPosition);
+
+        for (ChessMove move : potentialMoves) {
+            applyMove(move);
+            if (!isInCheck(teamTurn)) {
+                validMoves.add(move);
+            }
+            undoLastMove();
+        }
+
+        return validMoves;
     }
+
 
     /**
      * Makes a move in a chess game

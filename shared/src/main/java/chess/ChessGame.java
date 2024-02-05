@@ -82,29 +82,21 @@ public class ChessGame {
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = board.getPiece(startPosition);
         if (piece == null) {
-            System.out.println("No piece at startPosition: " + startPosition);
             return null;
         }
-        System.out.println("Evaluating valid moves for piece at " + startPosition + " (" + piece.getPieceType() + ")");
-
+        TeamColor currentPlayer = piece.getTeamColor();
         Set<ChessMove> validMoves = new HashSet<>();
         Collection<ChessMove> potentialMoves = piece.pieceMoves(board, startPosition);
 
         for (ChessMove move : potentialMoves) {
-            System.out.println("Considering move: " + move);
             applyMove(move);
-            if (!isInCheck(teamTurn)) {
-                System.out.println("Move is valid: " + move);
+            if (!isInCheck(currentPlayer)) {
                 validMoves.add(move);
-            } else {
-                System.out.println("Move leaves king in check, not valid: " + move);
             }
             undoLastMove();
         }
-        System.out.println("Total valid moves from position " + startPosition + ": " + validMoves.size());
         return validMoves;
     }
-
     /**
      * Makes a move in a chess game
      *

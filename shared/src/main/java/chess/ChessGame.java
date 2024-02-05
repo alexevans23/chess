@@ -123,6 +123,17 @@ public class ChessGame {
         boolean wasPromotion = move.getPromotionPiece() != null;
         moveHistory.push(new MoveHistory(move, capturedPiece, wasPromotion));
     }
+    private ChessPosition findKingPosition(TeamColor teamColor) {
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                ChessPiece piece = board.getPiece(new ChessPosition(row + 1, col + 1));
+                if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == teamColor) {
+                    return new ChessPosition(row + 1, col + 1);
+                }
+            }
+        }
+        return null;
+    }
     /**
      * Determines if the given team is in check
      *
@@ -130,7 +141,23 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition kingPosition = findKingPosition(teamColor);
+        TeamColor opponentColor = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                ChessPosition position = new ChessPosition(row + 1, col + 1);
+                ChessPiece piece = board.getPiece(position);
+                if (piece != null && piece.getTeamColor() == opponentColor) {
+                    Collection<ChessMove> moves = piece.pieceMoves(board, position);
+                    for (ChessMove move : moves) {
+                        if (move.getEndPosition().equals(kingPosition)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
     /**
      * Determines if the given team is in checkmate
@@ -152,7 +179,6 @@ public class ChessGame {
     public boolean isInStalemate(TeamColor teamColor) {
         throw new RuntimeException("Not implemented");
     }
-
     /**
      * Sets this game's chessboard with a given board
      *

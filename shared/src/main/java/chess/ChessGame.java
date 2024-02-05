@@ -141,10 +141,7 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition kingPosition = findKingPosition(teamColor);
-        System.out.println("Checking if " + teamColor + " king at " + kingPosition + " is in check");
-
         if (kingPosition == null) {
-            System.out.println("King not found for " + teamColor);
             return false;
         }
 
@@ -156,17 +153,14 @@ public class ChessGame {
                 if (piece != null && piece.getTeamColor() == opponentColor) {
                     for (ChessMove move : piece.pieceMoves(board, position)) {
                         if (move.getEndPosition().equals(kingPosition)) {
-                            System.out.println("King is in check by " + piece.getPieceType() + " at " + position);
                             return true;
                         }
                     }
                 }
             }
         }
-        System.out.println(teamColor + " king is not in check.");
         return false;
     }
-
     /**
      * Determines if the given team is in checkmate
      *

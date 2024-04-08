@@ -18,6 +18,10 @@ public class MemoryGameDAO implements GameDAO {
         }
         games.put(game.gameID(), game);
     }
+    @Override
+    public void clear() throws DataAccessException {
+        games.clear();  // This will remove all game entries from the map
+    }
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {

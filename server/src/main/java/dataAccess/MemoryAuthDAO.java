@@ -10,6 +10,10 @@ public class MemoryAuthDAO implements AuthDAO {
     private final Map<String, AuthData> authTokens = new HashMap<>();
 
     @Override
+    public void clear() {
+        authTokens.clear();
+    }
+    @Override
     public void createAuth(AuthData auth) throws DataAccessException {
         if (authTokens.containsKey(auth.authToken())) {
             throw new DataAccessException("Auth token already exists: " + auth.authToken());

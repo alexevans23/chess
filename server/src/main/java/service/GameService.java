@@ -36,8 +36,6 @@ public class GameService {
             if (authDAO.getAuth(authToken) == null || gameDAO.getGame(gameID) == null) {
                 return new JoinGameResult(false, "Invalid auth token or game ID", -1);
             }
-            // Additional logic for joining the game
-            // This is simplified; you would normally update the game's state here
             return new JoinGameResult(true, "Joined game successfully", gameID);
         } catch (Exception e) {
             return new JoinGameResult(false, "Failed to join game: " + e.getMessage(), -1);

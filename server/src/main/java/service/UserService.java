@@ -45,6 +45,13 @@ public class UserService {
     private String generateAuthToken(String username) {
         return java.util.UUID.randomUUID().toString();
     }
+    private boolean userExists(String username) {
+        try {
+            return userDAO.getUser(username) != null;
+        } catch (DataAccessException e) {
+            return false;
+        }
+    }
     private boolean checkPassword(String inputPassword, String storedPassword) {
         return inputPassword.equals(storedPassword);
     }

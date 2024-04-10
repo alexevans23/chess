@@ -1,7 +1,6 @@
 package dataAccess;
 
 import model.AuthData;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,6 +12,12 @@ public class MemoryAuthDAO implements AuthDAO {
     public void clear() {
         authTokens.clear();
     }
+
+    @Override
+    public boolean validateAuthToken(String authToken) {
+        return authTokens.containsKey(authToken);
+    }
+
     @Override
     public void createAuth(AuthData auth) throws DataAccessException {
         if (authTokens.containsKey(auth.authToken())) {
@@ -38,4 +43,5 @@ public class MemoryAuthDAO implements AuthDAO {
         authTokens.remove(authToken);
     }
 }
+
 

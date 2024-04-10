@@ -2,6 +2,7 @@ package service;
 
 import dataAccess.GameDAO;
 import dataAccess.AuthDAO;
+import dataAccess.DataAccessException;
 import model.GameData;
 import result.CreateGameResult;
 import result.ListGamesResult;
@@ -21,54 +22,47 @@ public class GameService {
 
     public CreateGameResult createGame(String authToken, GameData gameData) {
         try {
-            // Validate auth token
-            if (authDAO.getAuth(authToken) == null) {
-                return new CreateGameResult(false, "Invalid auth token", -1);
+            boolean tokenValid = authDAO.validateAuthToken(authToken);
+            if (!tokenValid) {
+                return new CreateGameResult(false, "Error: Invalid auth token or game ID", -1);
             }
-
-            // Create game and get generated gameID
             int gameID = gameDAO.createGame(gameData);
-
-            // Check if gameID is valid
-            if (gameID <= 0) {
-                return new CreateGameResult(false, "Game creation failed: Invalid game ID", -1);
-            }
-
             return new CreateGameResult(true, "Game created successfully", gameID);
-        } catch (Exception e) {
-            return new CreateGameResult(false, "Game creation failed: " + e.getMessage(), -1);
+        } catch (DataAccessException e) {
+            return new CreateGameResult(false, e.getMessage(), -1);
         }
     }
 
     public JoinGameResult joinGame(String authToken, int gameID, String playerColor) {
         try {
             if (authDAO.getAuth(authToken) == null || gameDAO.getGame(gameID) == null) {
-                return new JoinGameResult(false, "Invalid auth token or game ID", -1);
+                return new JoinGameResult(false, "Error: Invalid auth token or game ID", -1);
             }
             return new JoinGameResult(true, "Joined game successfully", gameID);
-        } catch (Exception e) {
-            return new JoinGameResult(false, "Failed to join game: " + e.getMessage(), -1);
+        } catch (DataAccessException e) {
+            return new JoinGameResult(false, e.getMessage(), -1);
         }
     }
 
     public ListGamesResult listGames(String authToken) {
         try {
             if (authDAO.getAuth(authToken) == null) {
-                return new ListGamesResult(false, "Invalid auth token", null);
+                return new ListGamesResult(false, "Error: unauthorized", null);
             }
             List<GameData> games = gameDAO.listGames();
             return new ListGamesResult(true, "Games listed successfully", games);
-        } catch (Exception e) {
-            return new ListGamesResult(false, "Failed to list games: " + e.getMessage(), null);
+        } catch (DataAccessException e) {
+            return new ListGamesResult(false, e.getMessage(), null);
         }
     }
 
     public void clearAllGames() {
         try {
             gameDAO.clear();
-        } catch (Exception e) {
+        } catch (DataAccessException e) {
             throw new RuntimeException("Failed to clear games: " + e.getMessage(), e);
         }
     }
 }
+
 

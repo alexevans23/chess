@@ -77,6 +77,7 @@ public class Server {
 
             return new Gson().toJson(logoutResult);
         });
+
         Spark.post("/game", (request, response) -> {
             String authToken = request.headers("Authorization");
             Gson gson = new Gson();
@@ -84,24 +85,22 @@ public class Server {
 
             if (gameData == null || gameData.gameName() == null || gameData.gameName().trim().isEmpty()) {
                 response.status(HttpURLConnection.HTTP_BAD_REQUEST);
-                return gson.toJson(Map.of("message", "Error: bad request - missing game name"));
+                return gson.toJson(Map.of("message", "Error: bad request"));
             }
 
             CreateGameResult createGameResult = gameService.createGame(authToken, gameData);
 
             if (createGameResult.success()) {
                 response.status(HttpURLConnection.HTTP_OK);
+                response.type("application/json");
+                return gson.toJson(createGameResult);
             } else {
-                if (createGameResult.message().contains("Invalid auth token")) {
-                    response.status(HttpURLConnection.HTTP_UNAUTHORIZED);
-                } else {
-                    response.status(HttpURLConnection.HTTP_INTERNAL_ERROR);
-                }
+                response.status(HttpURLConnection.HTTP_UNAUTHORIZED);
+                response.type("application/json");
+                return gson.toJson(Map.of("message", createGameResult.message()));
             }
-
-            response.type("application/json");
-            return gson.toJson(createGameResult);
         });
+
 
 
         Spark.delete("/db", (request, response) -> {

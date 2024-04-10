@@ -14,12 +14,25 @@ public class UserService {
         this.authDAO = authDAO;
     }
     public RegisterResult register(UserData newUser) {
+        if (newUser.username() == null || newUser.username().trim().isEmpty() ||
+                newUser.password() == null || newUser.password().trim().isEmpty() ||
+                newUser.email() == null || newUser.email().trim().isEmpty()) {
+            return new RegisterResult(null, null, false, "Error: bad request - missing or empty fields");
+        }
+
+        try {
+            UserData existingUser = userDAO.getUser(newUser.username());
+            if (existingUser != null) {
+                return new RegisterResult(null, null, false, "Error: already taken");
+            }
+        } catch (DataAccessException ignored) {
+        }
         try {
             userDAO.createUser(newUser);
             String authToken = generateAuthToken(newUser.username());
             return new RegisterResult(newUser.username(), authToken, true, "User registered successfully");
         } catch (DataAccessException e) {
-            return new RegisterResult(newUser.username(), null, false, "Registration failed: " + e.getMessage());
+            return new RegisterResult(null, null, false, "Registration failed: " + e.getMessage());
         }
     }
     public LoginResult login(UserData loginData) {

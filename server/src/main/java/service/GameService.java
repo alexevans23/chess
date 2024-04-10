@@ -21,11 +21,20 @@ public class GameService {
 
     public CreateGameResult createGame(String authToken, GameData gameData) {
         try {
+            // Validate auth token
             if (authDAO.getAuth(authToken) == null) {
                 return new CreateGameResult(false, "Invalid auth token", -1);
             }
-            gameDAO.createGame(gameData);
-            return new CreateGameResult(true, "Game created successfully", gameData.gameID());
+
+            // Create game and get generated gameID
+            int gameID = gameDAO.createGame(gameData);
+
+            // Check if gameID is valid
+            if (gameID <= 0) {
+                return new CreateGameResult(false, "Game creation failed: Invalid game ID", -1);
+            }
+
+            return new CreateGameResult(true, "Game created successfully", gameID);
         } catch (Exception e) {
             return new CreateGameResult(false, "Game creation failed: " + e.getMessage(), -1);
         }

@@ -1,26 +1,29 @@
 package dataAccess;
 
 import model.GameData;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MemoryGameDAO implements GameDAO {
 
     private final Map<Integer, GameData> games = new HashMap<>();
+    private final AtomicInteger gameIDCounter = new AtomicInteger(1); // Atomic counter to generate unique IDs
 
     @Override
-    public void createGame(GameData game) throws DataAccessException {
-        if (games.containsKey(game.gameID())) {
-            throw new DataAccessException("Game already exists with ID: " + game.gameID());
-        }
-        games.put(game.gameID(), game);
+    public int createGame(GameData game) throws DataAccessException {
+        int gameID = gameIDCounter.getAndIncrement(); // Generate a unique ID for the game
+        GameData newGame = new GameData(gameID, game.whiteUsername(), game.blackUsername(), game.gameName());
+        games.put(gameID, newGame);
+        return gameID;
     }
+
     @Override
     public void clear() throws DataAccessException {
-        games.clear();  // This will remove all game entries from the map
+        games.clear();
+        gameIDCounter.set(1); // Reset the counter when clearing games
     }
 
     @Override
@@ -45,4 +48,5 @@ public class MemoryGameDAO implements GameDAO {
         games.put(game.gameID(), game);
     }
 }
+
 

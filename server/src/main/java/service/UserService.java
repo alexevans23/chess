@@ -35,18 +35,23 @@ public class UserService {
             return new RegisterResult(null, null, false, "Registration failed: " + e.getMessage());
         }
     }
+
     public LoginResult login(UserData loginData) {
         try {
             UserData user = userDAO.getUser(loginData.username());
-            if (checkPassword(loginData.password(), user.password())) {
+            if (user != null && checkPassword(loginData.password(), user.password())) {
                 String authToken = generateAuthToken(user.username());
-                return new LoginResult(true, "Login successful", authToken);
+                return new LoginResult(user.username(), authToken, true, "Login successful");
             }
-            return new LoginResult(false, "Login failed: Invalid credentials", null);
+            // If password is wrong or user is null
+            return new LoginResult(null, null, false, "Error: Login failed: Invalid credentials");
         } catch (DataAccessException e) {
-            return new LoginResult(false, "Login failed: " + e.getMessage(), null);
+            // Catch block executed when user is not found
+            return new LoginResult(null, null, false, "Error: Login failed: Invalid credentials");
         }
     }
+
+
     public LogoutResult logout(String authToken) {
         try {
             authDAO.deleteAuth(authToken);

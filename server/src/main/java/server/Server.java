@@ -1,16 +1,13 @@
 package server;
 
 import model.GameData;
-import result.CreateGameResult;
-import result.LogoutResult;
+import result.*;
 import service.GameService;
 import service.UserService;
 import dataAccess.MemoryUserDAO;
 import dataAccess.MemoryAuthDAO;
 import dataAccess.MemoryGameDAO;
 import model.UserData;
-import result.LoginResult;
-import result.RegisterResult;
 import spark.Spark;
 import com.google.gson.Gson;
 
@@ -100,6 +97,29 @@ public class Server {
                 return gson.toJson(Map.of("message", createGameResult.message()));
             }
         });
+
+        Spark.put("/game", (request, response) -> {
+            String authToken = request.headers("Authorization");
+            Gson gson = new Gson();
+            GameData joinGameData = gson.fromJson(request.body(), GameData.class);
+
+            if (joinGameData == null || joinGameData.gameID() <= 0 || (joinGameData.whiteUsername() == null && joinGameData.blackUsername() == null)) {
+                response.status(HttpURLConnection.HTTP_BAD_REQUEST);
+                return gson.toJson(Map.of("message", "Error: bad request"));
+            }
+
+            JoinGameResult joinGameResult = gameService.joinGame(authToken, joinGameData);
+
+            response.type("application/json");
+            if (joinGameResult.success()) {
+                response.status(HttpURLConnection.HTTP_OK);
+                return gson.toJson(joinGameResult);
+            } else {
+                response.status(HttpURLConnection.HTTP_UNAUTHORIZED);
+                return gson.toJson(Map.of("message", joinGameResult.message()));
+            }
+        });
+
 
 
 

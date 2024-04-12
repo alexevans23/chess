@@ -104,15 +104,15 @@ public class Server {
             Gson gson = new Gson();
             GameInteractionRequest interactionRequest = gson.fromJson(request.body(), GameInteractionRequest.class);
 
-            if (interactionRequest == null || interactionRequest.getGameID() <= 0) {
+            if (interactionRequest == null || interactionRequest.gameID() <= 0) {
                 response.status(HttpURLConnection.HTTP_BAD_REQUEST);
                 return gson.toJson(Map.of("message", "Error: bad request - missing or invalid game ID"));
             }
 
-            String playerColor = interactionRequest.getPlayerColor() != null ? interactionRequest.getPlayerColor() : "";
+            String playerColor = interactionRequest.playerColor() != null ? interactionRequest.playerColor() : "";
 
-            if ("WATCHER".equalsIgnoreCase(interactionRequest.getRole())) {
-                JoinGameResult watchResult = gameService.watchGame(authToken, interactionRequest.getGameID());
+            if ("WATCHER".equalsIgnoreCase(interactionRequest.role())) {
+                JoinGameResult watchResult = gameService.watchGame(authToken, interactionRequest.gameID());
                 response.type("application/json");
                 if (watchResult.success()) {
                     response.status(HttpURLConnection.HTTP_OK);
@@ -128,7 +128,7 @@ public class Server {
                     return gson.toJson(Map.of("message", "Error: Unauthorized - Invalid token"));
                 }
 
-                JoinGameResult joinGameResult = gameService.joinGame(authToken, interactionRequest.getGameID(), playerColor, username);
+                JoinGameResult joinGameResult = gameService.joinGame(authToken, interactionRequest.gameID(), playerColor, username);
 
                 response.type("application/json");
                 if (joinGameResult.success()) {

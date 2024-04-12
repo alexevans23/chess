@@ -70,6 +70,30 @@ class ServiceTests {
         assertFalse(result.success());
     }
 
+    @Test
+    void getUsernameFromTokenSuccess() throws DataAccessException {
+        UserData newUser = new UserData("user", "password", "email@example.com");
+        RegisterResult registered = userService.register(newUser);
+        String username = userService.getUsernameFromToken(registered.authToken());
+        assertEquals(newUser.username(), username);
+    }
+
+    @Test
+    void getUsernameFromTokenFailure() {
+        String username = userService.getUsernameFromToken("nonexistentToken");
+        assertNull(username);
+    }
+
+    @Test
+    void clearAllUsersAndAuthTokensSuccess() throws DataAccessException {
+        UserData newUser = new UserData("user", "password", "email@example.com");
+        userService.register(newUser);
+        userService.clearAllUsersAndAuthTokens();
+
+        LoginResult loginAttempt = userService.login(new UserData("user", "password", null));
+        assertFalse(loginAttempt.success());
+    }
+
     // GameService Tests
     @Test
     void createGameSuccess() throws DataAccessException {
@@ -153,15 +177,47 @@ class ServiceTests {
         assertTrue(result.success());
         assertTrue(result.games().isEmpty());
     }
+    // More Expansive Tests
+    @Test
+    void endToEndGameFlowSuccess() throws DataAccessException {
+        // Register and login
+        UserData newUser = new UserData("flowUser", "password", "flow@example.com");
+        RegisterResult registerResult = userService.register(newUser);
+        LoginResult loginResult = userService.login(newUser);
+
+        // Create a game
+        GameData newGame = new GameData(0, null, null, "Flow Chess Game");
+        CreateGameResult createGameResult = gameService.createGame(loginResult.authToken(), newGame);
+
+        // Join the game
+        JoinGameResult joinGameResult = gameService.joinGame(loginResult.authToken(), createGameResult.gameID(), "WHITE", newUser.username());
+
+        // List games to confirm it's there
+        ListGamesResult listGamesResult = gameService.listGames(loginResult.authToken());
+
+        assertTrue(registerResult.success());
+        assertTrue(loginResult.success());
+        assertTrue(createGameResult.success());
+        assertTrue(joinGameResult.success());
+        assertTrue(listGamesResult.success());
+        assertEquals(1, listGamesResult.games().size());
+    }
 
     @Test
-    void clearAllUsersAndAuthTokens() throws DataAccessException {
-        UserData newUser = new UserData("user", "password", "email@example.com");
+    void createMultipleGamesSuccess() throws DataAccessException {
+        UserData newUser = new UserData("multiGameUser", "password123", "user@example.com");
         userService.register(newUser);
-        userService.clearAllUsersAndAuthTokens();
+        String authToken = userService.login(newUser).authToken();
 
-        LoginResult loginAttempt = userService.login(new UserData("user", "password", null));
-        assertFalse(loginAttempt.success());
+        GameData firstGame = new GameData(0, null, null, "First Chess Game");
+        GameData secondGame = new GameData(0, null, null, "Second Chess Game");
+
+        CreateGameResult firstResult = gameService.createGame(authToken, firstGame);
+        CreateGameResult secondResult = gameService.createGame(authToken, secondGame);
+
+        assertTrue(firstResult.success());
+        assertTrue(secondResult.success());
+        assertNotEquals(firstResult.gameID(), secondResult.gameID());
     }
 
 }

@@ -10,11 +10,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MemoryGameDAO implements GameDAO {
 
     private final Map<Integer, GameData> games = new HashMap<>();
-    private final AtomicInteger gameIDCounter = new AtomicInteger(1); // Atomic counter to generate unique IDs
+    private final AtomicInteger gameIDCounter = new AtomicInteger(1);
 
     @Override
     public int createGame(GameData game) throws DataAccessException {
-        int gameID = gameIDCounter.getAndIncrement(); // Generate a unique ID for the game
+        int gameID = gameIDCounter.getAndIncrement();
         GameData newGame = new GameData(gameID, game.whiteUsername(), game.blackUsername(), game.gameName());
         games.put(gameID, newGame);
         return gameID;
@@ -23,7 +23,7 @@ public class MemoryGameDAO implements GameDAO {
     @Override
     public void clear() throws DataAccessException {
         games.clear();
-        gameIDCounter.set(1); // Reset the counter when clearing games
+        gameIDCounter.set(1);
     }
 
     @Override

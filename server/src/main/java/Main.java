@@ -17,8 +17,4 @@ public class Main {
             System.out.printf("Unable to start server: %s%n", e.getMessage());
         }
     }
-
-
-
-
 }

@@ -88,6 +88,14 @@ public class UserService {
             throw new RuntimeException("Failed to clear users and auths: " + e.getMessage(), e);
         }
     }
+    public String getUsernameFromToken(String authToken) {
+        try {
+            AuthData authData = authDAO.findAuthByToken(authToken);
+            return (authData != null) ? authData.username() : null;
+        } catch (DataAccessException e) {
+            return null;
+        }
+    }
 }
 
 

@@ -55,7 +55,7 @@ public class Server {
             if (loginResult.success()) {
                 response.status(HttpURLConnection.HTTP_OK);
             } else {
-                response.status(HttpURLConnection.HTTP_UNAUTHORIZED);  // Unauthorized
+                response.status(HttpURLConnection.HTTP_UNAUTHORIZED);
             }
 
             return new Gson().toJson(loginResult);
@@ -101,27 +101,46 @@ public class Server {
         Spark.put("/game", (request, response) -> {
             String authToken = request.headers("Authorization");
             Gson gson = new Gson();
-            GameData joinGameData = gson.fromJson(request.body(), GameData.class);
+            GameData gameRequest = gson.fromJson(request.body(), GameData.class);
+            String playerColor = gson.fromJson(request.body(), Map.class).get("playerColor").toString();
 
-            if (joinGameData == null || joinGameData.gameID() <= 0 || (joinGameData.whiteUsername() == null && joinGameData.blackUsername() == null)) {
+            if (gameRequest == null || gameRequest.gameID() <= 0 || playerColor == null || playerColor.trim().isEmpty()) {
                 response.status(HttpURLConnection.HTTP_BAD_REQUEST);
                 return gson.toJson(Map.of("message", "Error: bad request"));
             }
 
-            JoinGameResult joinGameResult = gameService.joinGame(authToken, joinGameData);
+            JoinGameResult joinGameResult = gameService.joinGame(authToken, gameRequest.gameID(), playerColor, userService.getUsernameFromToken(authToken));
 
             response.type("application/json");
             if (joinGameResult.success()) {
                 response.status(HttpURLConnection.HTTP_OK);
                 return gson.toJson(joinGameResult);
             } else {
-                response.status(HttpURLConnection.HTTP_UNAUTHORIZED);
+                response.status(joinGameResult.message().contains("slot already taken") ? HttpURLConnection.HTTP_FORBIDDEN : HttpURLConnection.HTTP_UNAUTHORIZED);
                 return gson.toJson(Map.of("message", joinGameResult.message()));
             }
         });
 
 
 
+
+        Spark.get("/game", (request, response) -> {
+            String authToken = request.headers("Authorization");
+            Gson gson = new Gson();
+            if (authToken == null || authToken.trim().isEmpty()) {
+                response.status(HttpURLConnection.HTTP_UNAUTHORIZED);
+                return gson.toJson(Map.of("message", "Error: Unauthorized - No auth token provided"));
+            }
+            ListGamesResult listGamesResult = gameService.listGames(authToken);
+            response.type("application/json");
+            if (listGamesResult.success()) {
+                response.status(HttpURLConnection.HTTP_OK);
+                return gson.toJson(listGamesResult);
+            } else {
+                response.status(HttpURLConnection.HTTP_UNAUTHORIZED);
+                return gson.toJson(Map.of("message", listGamesResult.message()));
+            }
+        });
 
         Spark.delete("/db", (request, response) -> {
             try {

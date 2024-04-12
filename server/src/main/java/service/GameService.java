@@ -33,28 +33,39 @@ public class GameService {
         }
     }
 
-    public JoinGameResult joinGame(String authToken, GameData joinGameData) {
+    public JoinGameResult joinGame(String authToken, int gameID, String playerColor, String username) {
         try {
             if (!authDAO.validateAuthToken(authToken)) {
-                return new JoinGameResult(false, "Error: Invalid auth token", -1);
+                return new JoinGameResult(false, "Error: Unauthorized - Invalid auth token", -1);
             }
-            GameData existingGame = gameDAO.getGame(joinGameData.gameID());
-            if (existingGame == null) {
+
+            GameData game = gameDAO.getGame(gameID);
+            if (game == null) {
                 return new JoinGameResult(false, "Error: Game not found", -1);
             }
-            if (joinGameData.whiteUsername() != null && existingGame.whiteUsername() == null) {
-                existingGame = new GameData(existingGame.gameID(), joinGameData.whiteUsername(), existingGame.blackUsername(), existingGame.gameName());
-            } else if (joinGameData.blackUsername() != null && existingGame.blackUsername() == null) {
-                existingGame = new GameData(existingGame.gameID(), existingGame.whiteUsername(), joinGameData.blackUsername(), existingGame.gameName());
+
+            if ("WHITE".equalsIgnoreCase(playerColor)) {
+                if (game.whiteUsername() != null) {
+                    return new JoinGameResult(false, "Error: White player slot already taken", gameID);
+                }
+                game = new GameData(game.gameID(), username, game.blackUsername(), game.gameName());
+            } else if ("BLACK".equalsIgnoreCase(playerColor)) {
+                if (game.blackUsername() != null) {
+                    return new JoinGameResult(false, "Error: Black player slot already taken", gameID);
+                }
+                game = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName());
             } else {
-                return new JoinGameResult(false, "Error: Player slot already taken or invalid position", existingGame.gameID());
+                return new JoinGameResult(false, "Error: Invalid player color", gameID);
             }
-            gameDAO.updateGame(existingGame);
-            return new JoinGameResult(true, "Joined game successfully", existingGame.gameID());
+
+            gameDAO.updateGame(game);
+            return new JoinGameResult(true, "Joined game successfully", gameID);
         } catch (DataAccessException e) {
             return new JoinGameResult(false, "Failed to join game: " + e.getMessage(), -1);
         }
     }
+
+
     public ListGamesResult listGames(String authToken) {
         try {
             if (authDAO.getAuth(authToken) == null) {
@@ -75,5 +86,6 @@ public class GameService {
         }
     }
 }
+
 
 

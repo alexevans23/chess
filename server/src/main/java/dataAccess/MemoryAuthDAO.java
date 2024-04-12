@@ -7,7 +7,10 @@ import java.util.Map;
 public class MemoryAuthDAO implements AuthDAO {
 
     private final Map<String, AuthData> authTokens = new HashMap<>();
-
+    @Override
+    public AuthData findAuthByToken(String authToken) {
+        return authTokens.get(authToken);
+    }
     @Override
     public void clear() {
         authTokens.clear();

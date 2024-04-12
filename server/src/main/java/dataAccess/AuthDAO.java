@@ -8,6 +8,7 @@ public interface AuthDAO {
     void deleteAuth(String authToken) throws DataAccessException;
     void clear() throws DataAccessException;
     boolean validateAuthToken(String authToken) throws DataAccessException;
+    AuthData findAuthByToken(String authToken) throws DataAccessException;
 }
 
 

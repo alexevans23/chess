@@ -33,7 +33,34 @@ public class GameService {
         }
     }
 
-    public JoinGameResult joinGame(String authToken, int gameID, String playerColor, String username) {
+    public JoinGameResult joinGame(String authToken, int gameID, String playerColor, String username) throws DataAccessException {
+        if (!authDAO.validateAuthToken(authToken)) {
+            return new JoinGameResult(false, "Error: Unauthorized - Invalid auth token", -1);
+        }
+
+        GameData game = gameDAO.getGame(gameID);
+        if (game == null) {
+            return new JoinGameResult(false, "Error: Game not found", -1);
+        }
+
+        if (("WHITE".equalsIgnoreCase(playerColor) && game.whiteUsername() != null) ||
+                ("BLACK".equalsIgnoreCase(playerColor) && game.blackUsername() != null)) {
+            return new JoinGameResult(false, "Error: Slot already taken", -1);
+        }
+
+        if ("WHITE".equalsIgnoreCase(playerColor)) {
+            game = new GameData(game.gameID(), username, game.blackUsername(), game.gameName());
+        } else if ("BLACK".equalsIgnoreCase(playerColor)) {
+            game = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName());
+        }
+
+        gameDAO.updateGame(game);
+        return new JoinGameResult(true, "Joined game successfully", gameID);
+    }
+
+
+
+    public JoinGameResult watchGame(String authToken, int gameID) {
         try {
             if (!authDAO.validateAuthToken(authToken)) {
                 return new JoinGameResult(false, "Error: Unauthorized - Invalid auth token", -1);
@@ -44,24 +71,9 @@ public class GameService {
                 return new JoinGameResult(false, "Error: Game not found", -1);
             }
 
-            if ("WHITE".equalsIgnoreCase(playerColor)) {
-                if (game.whiteUsername() != null) {
-                    return new JoinGameResult(false, "Error: White player slot already taken", gameID);
-                }
-                game = new GameData(game.gameID(), username, game.blackUsername(), game.gameName());
-            } else if ("BLACK".equalsIgnoreCase(playerColor)) {
-                if (game.blackUsername() != null) {
-                    return new JoinGameResult(false, "Error: Black player slot already taken", gameID);
-                }
-                game = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName());
-            } else {
-                return new JoinGameResult(false, "Error: Invalid player color", gameID);
-            }
-
-            gameDAO.updateGame(game);
-            return new JoinGameResult(true, "Joined game successfully", gameID);
+            return new JoinGameResult(true, "Watching game successfully", gameID);
         } catch (DataAccessException e) {
-            return new JoinGameResult(false, "Failed to join game: " + e.getMessage(), -1);
+            return new JoinGameResult(false, "Failed to watch game: " + e.getMessage(), -1);
         }
     }
 

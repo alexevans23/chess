@@ -1,6 +1,7 @@
 package server;
 
 import model.GameData;
+import model.GameInteractionRequest;
 import result.*;
 import service.GameService;
 import service.UserService;
@@ -16,8 +17,8 @@ import java.util.Map;
 
 public class Server {
 
-    private UserService userService;
-    private GameService gameService;
+    private final UserService userService;
+    private final GameService gameService;
 
     public Server() {
         MemoryUserDAO userDAO = new MemoryUserDAO();
@@ -101,28 +102,45 @@ public class Server {
         Spark.put("/game", (request, response) -> {
             String authToken = request.headers("Authorization");
             Gson gson = new Gson();
-            GameData gameRequest = gson.fromJson(request.body(), GameData.class);
-            String playerColor = gson.fromJson(request.body(), Map.class).get("playerColor").toString();
+            GameInteractionRequest interactionRequest = gson.fromJson(request.body(), GameInteractionRequest.class);
 
-            if (gameRequest == null || gameRequest.gameID() <= 0 || playerColor == null || playerColor.trim().isEmpty()) {
+            if (interactionRequest == null || interactionRequest.getGameID() <= 0) {
                 response.status(HttpURLConnection.HTTP_BAD_REQUEST);
-                return gson.toJson(Map.of("message", "Error: bad request"));
+                return gson.toJson(Map.of("message", "Error: bad request - missing or invalid game ID"));
             }
 
-            JoinGameResult joinGameResult = gameService.joinGame(authToken, gameRequest.gameID(), playerColor, userService.getUsernameFromToken(authToken));
+            String playerColor = interactionRequest.getPlayerColor() != null ? interactionRequest.getPlayerColor() : "";
 
-            response.type("application/json");
-            if (joinGameResult.success()) {
-                response.status(HttpURLConnection.HTTP_OK);
-                return gson.toJson(joinGameResult);
+            if ("WATCHER".equalsIgnoreCase(interactionRequest.getRole())) {
+                JoinGameResult watchResult = gameService.watchGame(authToken, interactionRequest.getGameID());
+                response.type("application/json");
+                if (watchResult.success()) {
+                    response.status(HttpURLConnection.HTTP_OK);
+                    return gson.toJson(Map.of("message", "Watching the game successfully"));
+                } else {
+                    response.status(HttpURLConnection.HTTP_UNAUTHORIZED);
+                    return gson.toJson(Map.of("message", watchResult.message()));
+                }
             } else {
-                response.status(joinGameResult.message().contains("slot already taken") ? HttpURLConnection.HTTP_FORBIDDEN : HttpURLConnection.HTTP_UNAUTHORIZED);
-                return gson.toJson(Map.of("message", joinGameResult.message()));
+                String username = userService.getUsernameFromToken(authToken);
+                if (username == null) {
+                    response.status(HttpURLConnection.HTTP_UNAUTHORIZED);
+                    return gson.toJson(Map.of("message", "Error: Unauthorized - Invalid token"));
+                }
+
+                JoinGameResult joinGameResult = gameService.joinGame(authToken, interactionRequest.getGameID(), playerColor, username);
+
+                response.type("application/json");
+                if (joinGameResult.success()) {
+                    response.status(HttpURLConnection.HTTP_OK);
+                    return gson.toJson(joinGameResult);
+                } else {
+                    int statusCode = joinGameResult.message().contains("Error: Slot already taken") ? HttpURLConnection.HTTP_FORBIDDEN : HttpURLConnection.HTTP_UNAUTHORIZED;
+                    response.status(statusCode);
+                    return gson.toJson(Map.of("message", joinGameResult.message()));
+                }
             }
         });
-
-
-
 
         Spark.get("/game", (request, response) -> {
             String authToken = request.headers("Authorization");

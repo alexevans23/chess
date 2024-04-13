@@ -219,6 +219,59 @@ class ServiceTests {
         assertTrue(secondResult.success());
         assertNotEquals(firstResult.gameID(), secondResult.gameID());
     }
+    @Test
+    void loginUserImmediatelyAfterRegistrationSuccess() throws DataAccessException {
+        UserData newUser = new UserData("immediateUser", "password", "immediate@example.com");
+        userService.register(newUser);
+        LoginResult loginResult = userService.login(new UserData("immediateUser", "password", null));
+        assertTrue(loginResult.success());
+        assertNotNull(loginResult.authToken());
+    }
+
+    @Test
+    void multipleUserGameCreationSuccess() throws DataAccessException {
+        UserData firstUser = new UserData("firstUser", "password1", "first@example.com");
+        UserData secondUser = new UserData("secondUser", "password2", "second@example.com");
+        userService.register(firstUser);
+        userService.register(secondUser);
+
+        String firstToken = userService.login(new UserData("firstUser", "password1", null)).authToken();
+        String secondToken = userService.login(new UserData("secondUser", "password2", null)).authToken();
+
+        CreateGameResult firstGameResult = gameService.createGame(firstToken, new GameData(0, null, null, "First Game"));
+        CreateGameResult secondGameResult = gameService.createGame(secondToken, new GameData(0, null, null, "Second Game"));
+
+        assertTrue(firstGameResult.success());
+        assertTrue(secondGameResult.success());
+    }
+
+    @Test
+    void retrieveUserDetailsUsingTokenSuccess() throws DataAccessException {
+        UserData user = new UserData("tokenUser", "password", "token@example.com");
+        RegisterResult registerResult = userService.register(user);
+        String usernameRetrieved = userService.getUsernameFromToken(registerResult.authToken());
+        assertEquals(user.username(), usernameRetrieved);
+    }
+    @Test
+    void listJoinedGamesSuccess() throws DataAccessException {
+        UserData newUser = new UserData("listGamesUser", "password", "listGames@example.com");
+        RegisterResult registerResult = userService.register(newUser);
+        String authToken = registerResult.authToken();
+
+        gameService.createGame(authToken, new GameData(0, "listGamesUser", null, "Chess Game 1"));
+        gameService.createGame(authToken, new GameData(0, "listGamesUser", null, "Chess Game 2"));
+
+        CreateGameResult firstGameResult = gameService.createGame(authToken, new GameData(0, null, null, "Chess Game 1"));
+        gameService.joinGame(authToken, firstGameResult.gameID(), "WHITE", "listGamesUser");
+
+        ListGamesResult gamesList = gameService.listGames(authToken);
+
+        assertTrue(gamesList.success(), "Failed to list games successfully");
+        assertFalse(gamesList.games().isEmpty(), "Games list should not be empty");
+        assertFalse(false, "Games list should include at least one game");
+        assertEquals("Chess Game 1", gamesList.games().getFirst().gameName(), "The game name should match the joined game");
+    }
+
 
 }
 

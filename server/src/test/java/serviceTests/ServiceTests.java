@@ -1,10 +1,13 @@
-package service;
+package serviceTests;
 
 import dataAccess.*;
 import model.*;
 import result.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import service.GameService;
+import service.UserService;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ServiceTests {
@@ -272,7 +275,35 @@ class ServiceTests {
         assertEquals("Chess Game 1", gamesList.games().getFirst().gameName(), "The game name should match the joined game");
     }
 
+    @Test
+    void listMultipleGamesSuccess() throws DataAccessException {
+        UserData user = new UserData("gameListUser", "password123", "gamer@example.com");
+        userService.register(user);
+        String authToken = userService.login(user).authToken();
 
+        gameService.createGame(authToken, new GameData(0, null, null, "Game One"));
+        gameService.createGame(authToken, new GameData(0, null, null, "Game Two"));
+        gameService.createGame(authToken, new GameData(0, null, null, "Game Three"));
+
+        ListGamesResult gamesList = gameService.listGames(authToken);
+        assertTrue(gamesList.success(), "Should successfully list all games");
+        assertEquals(3, gamesList.games().size(), "Should list exactly three games");
+    }
+
+    @Test
+    void joinGameAsSecondPlayerSuccess() throws DataAccessException {
+        UserData firstUser = new UserData("user1", "password1", "email1@example.com");
+        RegisterResult firstUserRegistered = userService.register(firstUser);
+        GameData newGame = new GameData(0, null, null, "Chess");
+        CreateGameResult gameCreated = gameService.createGame(firstUserRegistered.authToken(), newGame);
+        gameService.joinGame(firstUserRegistered.authToken(), gameCreated.gameID(), "WHITE", firstUser.username());
+        UserData secondUser = new UserData("user2", "password2", "email2@example.com");
+        RegisterResult secondUserRegistered = userService.register(secondUser);
+
+        JoinGameResult secondPlayerJoined = gameService.joinGame(secondUserRegistered.authToken(), gameCreated.gameID(), "BLACK", secondUser.username());
+
+        assertTrue(secondPlayerJoined.success(), "Second player should join successfully");
+    }
 }
 
 

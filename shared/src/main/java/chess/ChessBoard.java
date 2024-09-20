@@ -86,6 +86,20 @@ public class ChessBoard {
     public int hashCode() {
         return Arrays.deepHashCode(squares);
     }
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (ChessPiece[] square : squares) {
+            for (ChessPiece chessPiece : square) {
+                if (chessPiece == null) {
+                    sb.append("| ");
+                } else {
+                    sb.append("|").append(chessPiece.getSymbol());
+                }
+            }
+            sb.append("|\n");
+        }
+        return "ChessBoard{\n" + sb.toString() + '}';
+    }
     public void applyMove(ChessMove move) {
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();

@@ -19,9 +19,10 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        throw new RuntimeException("Not implemented");
+        int row = position.getRow() - 1;
+        int column = position.getColumn() - 1;
+        squares[row][column] = piece;
     }
-
     /**
      * Gets a chess piece on the chessboard
      *

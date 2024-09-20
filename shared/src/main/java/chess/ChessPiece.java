@@ -52,6 +52,31 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> moves = new HashSet<>();
+
+        switch (this.getPieceType()) {
+            case KING -> kingMoves(board, myPosition, moves);
+            case QUEEN -> queenMoves(board, myPosition, moves);
+            case BISHOP -> bishopMoves(board, myPosition, moves);
+            case KNIGHT -> knightMove(board, myPosition, moves);
+            case ROOK -> rookMove(board, myPosition, moves);
+            case PAWN -> pawnMove(board, myPosition, moves);
+        }
+        return moves;
     }
+    private void addMoveIfValid(ChessBoard board, ChessPosition currentPosition, int dRow, int dCol, Collection<ChessMove> moves) {
+        int newRow = currentPosition.getRow() + dRow;
+        int newCol = currentPosition.getColumn() + dCol;
+        if (validMove(newRow, newCol)) {
+            ChessPosition newPosition = new ChessPosition(newRow, newCol);
+            ChessPiece pieceAtNewPosition = board.getPiece(newPosition);
+            if (pieceAtNewPosition == null || pieceAtNewPosition.getTeamColor() != this.getTeamColor()) {
+                moves.add(new ChessMove(currentPosition, newPosition, null));
+            }
+        }
+    }
+    private boolean validMove(int row, int col) {
+        return row >= 1 && row <= 8 && col >= 1 && col <= 8;
+    }
+
 }

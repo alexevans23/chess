@@ -60,4 +60,16 @@ public class ChessBoard {
     public int hashCode() {
         return Arrays.deepHashCode(squares);
     }
+    public void applyMove(ChessMove move) {
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+        ChessPiece movingPiece = getPiece(start);
+        squares[start.getRow() - 1][start.getColumn() - 1] = null;
+
+        if (move.getPromotionPiece() != null) {
+            squares[end.getRow() - 1][end.getColumn() - 1] = new ChessPiece(movingPiece.getTeamColor(), move.getPromotionPiece());
+        } else {
+            squares[end.getRow() - 1][end.getColumn() - 1] = movingPiece;
+        }
+    }
 }

@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -175,5 +176,36 @@ public class ChessPiece {
     private boolean validMove(int row, int col) {
         return row >= 1 && row <= 8 && col >= 1 && col <= 8;
     }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessPiece that = (ChessPiece) o;
+        return pieceColor == that.pieceColor && type == that.type;
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(pieceColor, type);
+    }
+
+    @Override
+    public String toString() {
+        return "ChessPiece{" +
+                "pieceColor=" + pieceColor +
+                ", type=" + type +
+                '}';
+    }
+    public String getSymbol() {
+        return switch (this.type) {
+            case PAWN -> pieceColor == ChessGame.TeamColor.WHITE ? "P" : "p";
+            case KNIGHT -> pieceColor == ChessGame.TeamColor.WHITE ? "N" : "n";
+            case BISHOP -> pieceColor == ChessGame.TeamColor.WHITE ? "B" : "b";
+            case ROOK -> pieceColor == ChessGame.TeamColor.WHITE ? "R" : "r";
+            case QUEEN -> pieceColor == ChessGame.TeamColor.WHITE ? "Q" : "q";
+            case KING -> pieceColor == ChessGame.TeamColor.WHITE ? "K" : "k";
+        };
+    }
 }
+
+

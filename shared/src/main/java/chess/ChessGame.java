@@ -92,7 +92,7 @@ public class ChessGame {
             }
             undoLastMove();
         }
-        return validMoves;;
+        return validMoves;
     }
 
     /**
@@ -102,7 +102,23 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPosition start = move.getStartPosition();
+        ChessPiece movingPiece = board.getPiece(start);
+        if (movingPiece == null) {
+            throw new InvalidMoveException("No piece at the start position.");
+        }
+        if (movingPiece.getTeamColor() != teamTurn) {
+            throw new InvalidMoveException("It's not " + movingPiece.getTeamColor() + "'s turn.");
+        }
+        Collection<ChessMove> validMoves = validMoves(start);
+        if (validMoves == null || !validMoves.contains(move)) {
+            throw new InvalidMoveException("This move is not valid.");
+        }
+        applyMove(move);
+        teamTurn = (teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+        ChessPiece capturedPiece = board.getPiece(move.getEndPosition());
+        boolean wasPromotion = move.getPromotionPiece() != null;
+        moveHistory.push(new MoveHistory(move, capturedPiece, wasPromotion));;
     }
 
     /**

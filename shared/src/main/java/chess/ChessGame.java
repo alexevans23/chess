@@ -11,10 +11,14 @@ import java.util.Stack;
  * signature of the existing methods.
  */
 public class ChessGame {
-
+    private ChessBoard board;
+    private TeamColor teamTurn;
     public ChessGame() {
-
+        this.board = new ChessBoard();
+        this.teamTurn = TeamColor.WHITE;
+        board.resetBoard();
     }
+
 
     /**
      * @return Which team's turn it is

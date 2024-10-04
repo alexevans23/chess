@@ -52,7 +52,23 @@ public class ChessGame {
         boolean wasPromotion = move.getPromotionPiece() != null;
         moveHistory.push(new MoveHistory(move, capturedPiece, wasPromotion));
     }
-
+    public void undoLastMove() {
+        if (moveHistory.isEmpty()) {
+            System.out.println("No moves to undo.");
+            return;
+        }
+        MoveHistory lastMoveHistory = moveHistory.pop();
+        ChessMove lastMove = lastMoveHistory.move();
+        ChessPiece movedPiece = board.getPiece(lastMove.getEndPosition());
+        ChessPiece originalPiece = lastMoveHistory.wasPromotion() ?
+                new ChessPiece(movedPiece.getTeamColor(), ChessPiece.PieceType.PAWN) : movedPiece;
+        board.addPiece(lastMove.getStartPosition(), originalPiece);
+        if (lastMoveHistory.capturedPiece() != null) {
+            board.addPiece(lastMove.getEndPosition(), lastMoveHistory.capturedPiece());
+        } else {
+            board.addPiece(lastMove.getEndPosition(), null);
+        }
+    }
     /**
      * Gets a valid moves for a piece at the given location
      *

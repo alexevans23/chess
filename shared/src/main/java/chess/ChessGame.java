@@ -45,6 +45,13 @@ public class ChessGame {
         WHITE,
         BLACK
     }
+    public void applyMove(ChessMove move) {
+        ChessPiece movingPiece = board.getPiece(move.getStartPosition());
+        ChessPiece capturedPiece = board.getPiece(move.getEndPosition());
+        board.applyMove(move);
+        boolean wasPromotion = move.getPromotionPiece() != null;
+        moveHistory.push(new MoveHistory(move, capturedPiece, wasPromotion));
+    }
 
     /**
      * Gets a valid moves for a piece at the given location

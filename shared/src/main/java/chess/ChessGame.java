@@ -52,7 +52,22 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        ChessPiece piece = board.getPiece(startPosition);
+        if (piece == null) {
+            return null;
+        }
+        TeamColor currentPlayer = piece.getTeamColor();
+        Set<ChessMove> validMoves = new HashSet<>();
+        Collection<ChessMove> potentialMoves = piece.pieceMoves(board, startPosition);
+
+        for (ChessMove move : potentialMoves) {
+            applyMove(move);
+            if (!isInCheck(currentPlayer)) {
+                validMoves.add(move);
+            }
+            undoLastMove();
+        }
+        return validMoves;;
     }
 
     /**

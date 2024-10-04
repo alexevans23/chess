@@ -13,10 +13,12 @@ import java.util.Stack;
 public class ChessGame {
     private ChessBoard board;
     private TeamColor teamTurn;
+    private Stack<MoveHistory> moveHistory = new Stack<>();
     public ChessGame() {
         this.board = new ChessBoard();
         this.teamTurn = TeamColor.WHITE;
         board.resetBoard();
+        this.moveHistory = new Stack<>();
     }
 
 

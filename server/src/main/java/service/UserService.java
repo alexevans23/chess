@@ -77,7 +77,7 @@ public class UserService {
     }
 
     private boolean checkPassword(String inputPassword, String storedPassword) {
-        return false;
+        return inputPassword.equals(storedPassword);
     }
 
     public void clearAllUsersAndAuthTokens() {

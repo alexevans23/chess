@@ -59,7 +59,20 @@ public class GameService {
     }
 
     public JoinGameResult watchGame(String authToken, int gameID) {
-        return null;
+        try {
+            if (!authDAO.validateAuthToken(authToken)) {
+                return new JoinGameResult(false, "Error: Unauthorized - Invalid auth token", -1);
+            }
+
+            GameData game = gameDAO.getGame(gameID);
+            if (game == null) {
+                return new JoinGameResult(false, "Error: Game not found", -1);
+            }
+
+            return new JoinGameResult(true, "Watching game successfully", gameID);
+        } catch (DataAccessException e) {
+            return new JoinGameResult(false, "Failed to watch game: " + e.getMessage(), -1);
+        }
     }
 
     public ListGamesResult listGames(String authToken) {

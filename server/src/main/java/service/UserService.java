@@ -90,7 +90,12 @@ public class UserService {
     }
 
     public String getUsernameFromToken(String authToken) {
-        return null;
+        try {
+            AuthData authData = authDAO.findAuthByToken(authToken);
+            return (authData != null) ? authData.username() : null;
+        } catch (DataAccessException e) {
+            return null;
+        }
     }
 }
 

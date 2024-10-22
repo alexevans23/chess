@@ -19,7 +19,29 @@ public class UserService {
     }
 
     public RegisterResult register(UserData newUser) {
-        return null;
+        if (newUser.username() == null || newUser.username().trim().isEmpty() ||
+                newUser.password() == null || newUser.password().trim().isEmpty() ||
+                newUser.email() == null || newUser.email().trim().isEmpty()) {
+            return new RegisterResult(null, null, false, "Error: bad request - missing or empty fields");
+        }
+
+        try {
+            UserData existingUser = userDAO.getUser(newUser.username());
+            if (existingUser != null) {
+                return new RegisterResult(null, null, false, "Error: already taken");
+            }
+        } catch (DataAccessException ignored) {
+        }
+
+        try {
+            userDAO.createUser(newUser);
+            String authToken = generateAuthToken(newUser.username());
+            AuthData authData = new AuthData(authToken, newUser.username());
+            authDAO.createAuth(authData);
+            return new RegisterResult(newUser.username(), authToken, true, "User registered successfully");
+        } catch (DataAccessException e) {
+            return new RegisterResult(null, null, false, "Registration failed: " + e.getMessage());
+        }
     }
 
     public LoginResult login(UserData loginData) {

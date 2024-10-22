@@ -73,7 +73,7 @@ public class UserService {
     }
 
     private String generateAuthToken(String username) {
-        return null;
+        return java.util.UUID.randomUUID().toString();
     }
 
     private boolean checkPassword(String inputPassword, String storedPassword) {

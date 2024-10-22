@@ -60,7 +60,16 @@ public class UserService {
     }
 
     public LogoutResult logout(String authToken) {
-        return null;
+        try {
+            boolean tokenValid = authDAO.validateAuthToken(authToken);
+            if (!tokenValid) {
+                return new LogoutResult(false, "Error: Invalid or expired auth token");
+            }
+            authDAO.deleteAuth(authToken);
+            return new LogoutResult(true, "Logout successful");
+        } catch (DataAccessException e) {
+            return new LogoutResult(false, "Error during logout: " + e.getMessage());
+        }
     }
 
     private String generateAuthToken(String username) {

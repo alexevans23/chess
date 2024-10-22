@@ -45,7 +45,18 @@ public class UserService {
     }
 
     public LoginResult login(UserData loginData) {
-        return null;
+        try {
+            UserData user = userDAO.getUser(loginData.username());
+            if (user != null && checkPassword(loginData.password(), user.password())) {
+                String authToken = generateAuthToken(user.username());
+                AuthData authData = new AuthData(authToken, user.username());
+                authDAO.createAuth(authData);
+                return new LoginResult(user.username(), authToken, true, "Login successful");
+            }
+            return new LoginResult(null, null, false, "Error: Login failed: Invalid credentials");
+        } catch (DataAccessException e) {
+            return new LoginResult(null, null, false, "Error: Login failed: Invalid credentials");
+        }
     }
 
     public LogoutResult logout(String authToken) {

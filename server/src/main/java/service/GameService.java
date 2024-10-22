@@ -34,7 +34,28 @@ public class GameService {
     }
 
     public JoinGameResult joinGame(String authToken, int gameID, String playerColor, String username) throws DataAccessException {
-        return null;
+        if (!authDAO.validateAuthToken(authToken)) {
+            return new JoinGameResult(false, "Error: Unauthorized - Invalid auth token", -1);
+        }
+
+        GameData game = gameDAO.getGame(gameID);
+        if (game == null) {
+            return new JoinGameResult(false, "Error: Game not found", -1);
+        }
+
+        if (("WHITE".equalsIgnoreCase(playerColor) && game.whiteUsername() != null) ||
+                ("BLACK".equalsIgnoreCase(playerColor) && game.blackUsername() != null)) {
+            return new JoinGameResult(false, "Error: Slot already taken", -1);
+        }
+
+        if ("WHITE".equalsIgnoreCase(playerColor)) {
+            game = new GameData(game.gameID(), username, game.blackUsername(), game.gameName());
+        } else if ("BLACK".equalsIgnoreCase(playerColor)) {
+            game = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName());
+        }
+
+        gameDAO.updateGame(game);
+        return new JoinGameResult(true, "Joined game successfully", gameID);
     }
 
     public JoinGameResult watchGame(String authToken, int gameID) {

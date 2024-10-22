@@ -76,7 +76,15 @@ public class GameService {
     }
 
     public ListGamesResult listGames(String authToken) {
-        return null;
+        try {
+            if (authDAO.getAuth(authToken) == null) {
+                return new ListGamesResult(false, "Error: unauthorized", null);
+            }
+            List<GameData> games = gameDAO.listGames();
+            return new ListGamesResult(true, "Games listed successfully", games);
+        } catch (DataAccessException e) {
+            return new ListGamesResult(false, e.getMessage(), null);
+        }
     }
 
     public void clearAllGames() {

@@ -88,6 +88,11 @@ public class GameService {
     }
 
     public void clearAllGames() {
+        try {
+            gameDAO.clear();
+        } catch (DataAccessException e) {
+            throw new RuntimeException("Failed to clear games: " + e.getMessage(), e);
+        }
     }
 }
 

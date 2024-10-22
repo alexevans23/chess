@@ -81,6 +81,12 @@ public class UserService {
     }
 
     public void clearAllUsersAndAuthTokens() {
+        try {
+            userDAO.clear();
+            authDAO.clear();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to clear users and auths: " + e.getMessage(), e);
+        }
     }
 
     public String getUsernameFromToken(String authToken) {

@@ -1,0 +1,48 @@
+package service;
+
+import dataaccess.UserDAO;
+import dataaccess.AuthDAO;
+import dataaccess.DataAccessException;
+import model.AuthData;
+import model.UserData;
+import result.LoginResult;
+import result.RegisterResult;
+import result.LogoutResult;
+
+public class UserService {
+    private final UserDAO userDAO;
+    private final AuthDAO authDAO;
+
+    public UserService(UserDAO userDAO, AuthDAO authDAO) {
+        this.userDAO = userDAO;
+        this.authDAO = authDAO;
+    }
+
+    public RegisterResult register(UserData newUser) {
+        return null;
+    }
+
+    public LoginResult login(UserData loginData) {
+        return null;
+    }
+
+    public LogoutResult logout(String authToken) {
+        return null;
+    }
+
+    private String generateAuthToken(String username) {
+        return null;
+    }
+
+    private boolean checkPassword(String inputPassword, String storedPassword) {
+        return false;
+    }
+
+    public void clearAllUsersAndAuthTokens() {
+    }
+
+    public String getUsernameFromToken(String authToken) {
+        return null;
+    }
+}
+

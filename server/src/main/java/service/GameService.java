@@ -80,6 +80,10 @@ public class GameService {
 
     public ListGamesResult listGames(String authToken) {
         try {
+            boolean isTokenValid = authDAO.validateAuthToken(authToken);
+            if (!isTokenValid) {
+                return new ListGamesResult(false, "Error: Unauthorized - Invalid token", null);
+            }
             if (authDAO.getAuth(authToken) == null) {
                 return new ListGamesResult(false, "Error: unauthorized", null);
             }

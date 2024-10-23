@@ -33,6 +33,17 @@ public class Server {
         Spark.port(desiredPort);
         Spark.staticFiles.location("web");
 
+        setupUserRoutes();
+        setupGameRoutes();
+        setupDeleteRoute();
+
+        Spark.init();
+        Spark.awaitInitialization();
+
+        return Spark.port();
+    }
+
+    private void setupUserRoutes() {
         Spark.post("/user", (request, response) -> {
             UserData userData = new Gson().fromJson(request.body(), UserData.class);
             RegisterResult registerResult = userService.register(userData);
@@ -40,12 +51,10 @@ public class Server {
 
             if (registerResult.success()) {
                 response.status(HttpURLConnection.HTTP_OK);
+            } else if (registerResult.message().equals("Error: already taken")) {
+                response.status(HttpURLConnection.HTTP_FORBIDDEN);
             } else {
-                if (registerResult.message().equals("Error: already taken")) {
-                    response.status(HttpURLConnection.HTTP_FORBIDDEN);
-                } else {
-                    response.status(HttpURLConnection.HTTP_BAD_REQUEST);
-                }
+                response.status(HttpURLConnection.HTTP_BAD_REQUEST);
             }
 
             return new Gson().toJson(registerResult);
@@ -78,7 +87,9 @@ public class Server {
 
             return new Gson().toJson(logoutResult);
         });
+    }
 
+    private void setupGameRoutes() {
         Spark.post("/game", (request, response) -> {
             String authToken = request.headers("Authorization");
             Gson gson = new Gson();
@@ -117,7 +128,6 @@ public class Server {
                 response.status(HttpURLConnection.HTTP_BAD_REQUEST);
                 return gson.toJson(Map.of("message", "Error: Bad request - Invalid or missing player color"));
             }
-
 
             if ("WATCHER".equalsIgnoreCase(interactionRequest.role())) {
                 JoinGameResult watchResult = gameService.watchGame(authToken, interactionRequest.gameID());
@@ -167,7 +177,9 @@ public class Server {
                 return gson.toJson(Map.of("message", listGamesResult.message()));
             }
         });
+    }
 
+    private void setupDeleteRoute() {
         Spark.delete("/db", (request, response) -> {
             try {
                 userService.clearAllUsersAndAuthTokens();
@@ -181,11 +193,6 @@ public class Server {
                 return new Gson().toJson(Map.of("error", "Error clearing database: " + e.getMessage()));
             }
         });
-
-        Spark.init();
-        Spark.awaitInitialization();
-
-        return Spark.port();
     }
 
     public void stop() {
@@ -193,3 +200,4 @@ public class Server {
         Spark.awaitStop();
     }
 }
+

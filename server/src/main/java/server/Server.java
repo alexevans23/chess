@@ -112,7 +112,12 @@ public class Server {
                 return gson.toJson(Map.of("message", "Error: bad request - missing or invalid game ID"));
             }
 
-            String playerColor = interactionRequest.playerColor() != null ? interactionRequest.playerColor() : "";
+            String playerColor = interactionRequest.playerColor();
+            if ((!"WHITE".equalsIgnoreCase(playerColor) && !"BLACK".equalsIgnoreCase(playerColor))) {
+                response.status(HttpURLConnection.HTTP_BAD_REQUEST);
+                return gson.toJson(Map.of("message", "Error: Bad request - Invalid or missing player color"));
+            }
+
 
             if ("WATCHER".equalsIgnoreCase(interactionRequest.role())) {
                 JoinGameResult watchResult = gameService.watchGame(authToken, interactionRequest.gameID());

@@ -37,6 +37,9 @@ public class GameService {
         if (!authDAO.validateAuthToken(authToken)) {
             return new JoinGameResult(false, "Error: Unauthorized - Invalid auth token", -1);
         }
+        if ((!"WHITE".equalsIgnoreCase(playerColor) && !"BLACK".equalsIgnoreCase(playerColor))) {
+            return new JoinGameResult(false, "Error: Bad request - Invalid or missing player color", -1);
+        }
 
         GameData game = gameDAO.getGame(gameID);
         if (game == null) {

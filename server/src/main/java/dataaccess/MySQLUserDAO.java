@@ -60,6 +60,8 @@ public class MySQLUserDAO implements UserDAO {
         CREATE TABLE IF NOT EXISTS users (
             id INT NOT NULL AUTO_INCREMENT,
             username VARCHAR(50) NOT NULL UNIQUE,
+            password VARCHAR(255) NOT NULL,
+            email VARCHAR(100),
             json TEXT DEFAULT NULL,
             PRIMARY KEY (id)
         )

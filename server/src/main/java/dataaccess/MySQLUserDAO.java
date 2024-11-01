@@ -17,11 +17,12 @@ public class MySQLUserDAO implements UserDAO {
     }
 
     @Override
+
     public void createUser(UserData user) throws DataAccessException {
-        String statement = "INSERT INTO users (username, json) VALUES (?, ?)";
+        String statement = "INSERT INTO users (username, password, email, json) VALUES (?, ?, ?, ?)";
         String json = gson.toJson(user);
 
-        executeUpdate(statement, user.username(), json);
+        executeUpdate(statement, user.username(), user.password(), user.email(), json);
     }
 
     @Override

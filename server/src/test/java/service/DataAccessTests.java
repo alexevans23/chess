@@ -46,6 +46,24 @@ public class DataAccessTests {
             assertThrows(DataAccessException.class, () -> userDAO.getUser("user2"));
         });
     }
+    @Test
+    public void testGetUserSuccess() {
+        UserData newUser = new UserData("test_user", "hashed_password_example", "test@example.com");
+
+        assertDoesNotThrow(() -> {
+            userDAO.createUser(newUser);
+            UserData retrievedUser = userDAO.getUser("test_user");
+            assertNotNull(retrievedUser);
+            assertEquals("test_user", retrievedUser.username());
+            assertEquals("hashed_password_example", retrievedUser.password());
+            assertEquals("test@example.com", retrievedUser.email());
+            System.out.println("User retrieved successfully");
+        });
+    }
+    @Test
+    public void testGetUserNotFound() {
+        assertThrows(DataAccessException.class, () -> userDAO.getUser("non_existent_user"));
+    }
 }
 
 

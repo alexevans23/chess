@@ -27,7 +27,22 @@ public class MySQLUserDAO implements UserDAO {
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
-        return null;
+        String statement = "SELECT * FROM users WHERE username = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(statement)) {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String password = rs.getString("password");
+                    String email = rs.getString("email");
+                    return new UserData(username, password, email);
+                } else {
+                    throw new DataAccessException("User not found: " + username);
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error retrieving user: " + e.getMessage());
+        }
     }
     private void testConnection() throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
@@ -67,13 +82,21 @@ public class MySQLUserDAO implements UserDAO {
         )
         """
     };
-    private void configureDatabase() throws DataAccessException {
+    public void configureDatabase() throws DataAccessException {
+        // Ensure the database itself exists
         DatabaseManager.createDatabase();
 
+        // Now create tables if they do not exist
         try (Connection conn = DatabaseManager.getConnection()) {
+            System.out.println("Connected to database for configuration.");
             for (String statement : createStatements) {
+                System.out.println("Executing statement: " + statement);
                 try (PreparedStatement preparedStatement = conn.prepareStatement(statement)) {
                     preparedStatement.executeUpdate();
+                    System.out.println("Table created or already exists.");
+                } catch (SQLException ex) {
+                    System.err.println("Error executing statement: " + statement);
+                    throw new DataAccessException("Unable to configure database: " + ex.getMessage());
                 }
             }
         } catch (SQLException ex) {

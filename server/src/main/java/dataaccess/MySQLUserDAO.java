@@ -6,8 +6,9 @@ import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
 public class MySQLUserDAO implements UserDAO {
+    private final Gson gson = new Gson();
     public MySQLUserDAO() throws DataAccessException {
-        testConnection();
+        configureDatabase();
     }
     @Override
     public void clear() throws DataAccessException {
@@ -17,6 +18,10 @@ public class MySQLUserDAO implements UserDAO {
 
     @Override
     public void createUser(UserData user) throws DataAccessException {
+        String statement = "INSERT INTO users (username, json) VALUES (?, ?)";
+        String json = gson.toJson(user);
+
+        executeUpdate(statement, user.username(), json);
     }
 
     @Override
@@ -47,6 +52,29 @@ public class MySQLUserDAO implements UserDAO {
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Unable to update database: " + e.getMessage());
+        }
+    }
+    private final String[] createStatements = {
+            """
+        CREATE TABLE IF NOT EXISTS users (
+            id INT NOT NULL AUTO_INCREMENT,
+            username VARCHAR(50) NOT NULL UNIQUE,
+            json TEXT DEFAULT NULL,
+            PRIMARY KEY (id)
+        )
+        """
+    };
+    private void configureDatabase() throws DataAccessException {
+        DatabaseManager.createDatabase();
+
+        try (Connection conn = DatabaseManager.getConnection()) {
+            for (String statement : createStatements) {
+                try (PreparedStatement preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Unable to configure database: " + ex.getMessage());
         }
     }
 }

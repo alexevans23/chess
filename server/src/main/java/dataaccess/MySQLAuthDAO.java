@@ -10,7 +10,7 @@ public class MySQLAuthDAO implements AuthDAO {
 
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
-        return null; // Placeholder return value
+        return null;
     }
 
     @Override

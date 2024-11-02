@@ -1,6 +1,8 @@
 package dataaccess;
 
 import model.AuthData;
+import java.sql.*;
+import static java.sql.Types.NULL;
 
 public class MySQLAuthDAO implements AuthDAO {
 
@@ -19,6 +21,8 @@ public class MySQLAuthDAO implements AuthDAO {
 
     @Override
     public void clear() throws DataAccessException {
+        String statement = "DELETE FROM auth";
+        executeUpdate(statement);
     }
 
     @Override
@@ -29,6 +33,23 @@ public class MySQLAuthDAO implements AuthDAO {
     @Override
     public AuthData findAuthByToken(String authToken) throws DataAccessException {
         return null;
+    }
+    private void executeUpdate(String statement, Object... params) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(statement)) {
+
+            for (int i = 0; i < params.length; i++) {
+                Object param = params[i];
+                if (param instanceof String p) {
+                    ps.setString(i + 1, p);
+                } else if (param == null) {
+                    ps.setNull(i + 1, NULL);
+                }
+            }
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to update database: " + e.getMessage());
+        }
     }
 }
 

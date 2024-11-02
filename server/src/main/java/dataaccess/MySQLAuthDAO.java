@@ -21,6 +21,8 @@ public class MySQLAuthDAO implements AuthDAO {
 
     @Override
     public void deleteAuth(String authToken) throws DataAccessException {
+        String statement = "DELETE FROM auth WHERE authToken = ?";
+        executeUpdate(statement, authToken);
     }
 
     @Override

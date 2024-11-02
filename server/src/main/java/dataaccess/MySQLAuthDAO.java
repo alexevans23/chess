@@ -58,10 +58,9 @@ public class MySQLAuthDAO implements AuthDAO {
             throw new DataAccessException("Error validating auth token: " + e.getMessage());
         }
     }
-
     @Override
     public AuthData findAuthByToken(String authToken) throws DataAccessException {
-        return null;
+        return getAuth(authToken);
     }
     private void executeUpdate(String statement, Object... params) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection();

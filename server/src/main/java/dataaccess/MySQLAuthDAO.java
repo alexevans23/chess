@@ -9,9 +9,9 @@ public class MySQLAuthDAO implements AuthDAO {
         configureDatabase();
     }
 
-    @Override
     public void createAuth(AuthData auth) throws DataAccessException {
-
+        String statement = "INSERT INTO auth (authToken, username) VALUES (?, ?)";
+        executeUpdate(statement, auth.authToken(), auth.username());
     }
 
     @Override

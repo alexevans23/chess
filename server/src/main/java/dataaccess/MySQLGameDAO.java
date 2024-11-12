@@ -18,7 +18,23 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
-        return null;
+        String statement = "SELECT * FROM games WHERE gameID = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(statement)) {
+            ps.setInt(1, gameID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String whiteUsername = rs.getString("whiteUsername");
+                    String blackUsername = rs.getString("blackUsername");
+                    String gameName = rs.getString("gameName");
+                    return new GameData(gameID, whiteUsername, blackUsername, gameName);
+                } else {
+                    throw new DataAccessException("Game not found: ID " + gameID);
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error retrieving game: " + e.getMessage());
+        }
     }
 
     @Override

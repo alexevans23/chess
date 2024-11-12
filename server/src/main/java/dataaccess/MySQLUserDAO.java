@@ -83,10 +83,7 @@ public class MySQLUserDAO implements UserDAO {
         """
     };
     public void configureDatabase() throws DataAccessException {
-        // Ensure the database itself exists
         DatabaseManager.createDatabase();
-
-        // Now create tables if they do not exist
         try (Connection conn = DatabaseManager.getConnection()) {
             System.out.println("Connected to database for configuration.");
             for (String statement : createStatements) {

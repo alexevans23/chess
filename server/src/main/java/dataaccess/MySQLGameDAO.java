@@ -7,9 +7,14 @@ import java.util.List;
 
 public class MySQLGameDAO implements GameDAO {
 
+    public MySQLGameDAO() throws DataAccessException {
+        configureDatabase();
+    }
+
     @Override
     public int createGame(GameData game) throws DataAccessException {
-        return 0;
+        String statement = "INSERT INTO games (whiteUsername, blackUsername, gameName) VALUES (?, ?, ?)";
+        return executeUpdate(statement, true, game.whiteUsername(), game.blackUsername(), game.gameName());
     }
 
     @Override

@@ -2,6 +2,7 @@ package dataaccess;
 
 import model.GameData;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MySQLGameDAO implements GameDAO {
@@ -39,7 +40,22 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public List<GameData> listGames() throws DataAccessException {
-        return null;
+        String statement = "SELECT * FROM games";
+        List<GameData> games = new ArrayList<>();
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(statement);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                int gameID = rs.getInt("gameID");
+                String whiteUsername = rs.getString("whiteUsername");
+                String blackUsername = rs.getString("blackUsername");
+                String gameName = rs.getString("gameName");
+                games.add(new GameData(gameID, whiteUsername, blackUsername, gameName));
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error listing games: " + e.getMessage());
+        }
+        return games;
     }
 
     @Override

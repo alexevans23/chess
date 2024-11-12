@@ -60,6 +60,8 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public void updateGame(GameData game) throws DataAccessException {
+        String statement = "UPDATE games SET whiteUsername = ?, blackUsername = ?, gameName = ? WHERE gameID = ?";
+        executeUpdate(statement, false, game.whiteUsername(), game.blackUsername(), game.gameName(), game.gameID());
     }
     @Override
     public void clear() throws DataAccessException {

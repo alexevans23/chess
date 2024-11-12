@@ -2,7 +2,6 @@ package dataaccess;
 
 import model.GameData;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class MySQLGameDAO implements GameDAO {
@@ -14,7 +13,7 @@ public class MySQLGameDAO implements GameDAO {
     @Override
     public int createGame(GameData game) throws DataAccessException {
         String statement = "INSERT INTO games (whiteUsername, blackUsername, gameName) VALUES (?, ?, ?)";
-        return executeUpdate(statement, true, game.whiteUsername(), game.blackUsername(), game.gameName());
+        return executeUpdate(statement, game.whiteUsername(), game.blackUsername(), game.gameName());
     }
 
     @Override
@@ -30,13 +29,14 @@ public class MySQLGameDAO implements GameDAO {
     @Override
     public void updateGame(GameData game) throws DataAccessException {
     }
-
     @Override
     public void clear() throws DataAccessException {
+        String statement = "DELETE FROM games";
+        executeUpdate(statement, false);
     }
-    private int executeUpdate(String statement, boolean returnGeneratedKey, Object... params) throws DataAccessException {
+    private int executeUpdate(String statement, Object... params) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement ps = conn.prepareStatement(statement, returnGeneratedKey ? Statement.RETURN_GENERATED_KEYS : Statement.NO_GENERATED_KEYS)) {
+             PreparedStatement ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
             for (int i = 0; i < params.length; i++) {
                 switch (params[i]) {
                     case String s -> ps.setString(i + 1, s);
@@ -47,11 +47,9 @@ public class MySQLGameDAO implements GameDAO {
                 }
             }
             ps.executeUpdate();
-            if (returnGeneratedKey) {
-                try (ResultSet rs = ps.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        return rs.getInt(1);
-                    }
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
                 }
             }
             return 0;

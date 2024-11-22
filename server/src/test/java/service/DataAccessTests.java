@@ -46,6 +46,22 @@ public class DataAccessTests {
         });
     }
     @Test
+    public void testGetGameSuccess() {
+        GameData newGame = new GameData(0, "whitePlayer", "blackPlayer", "Test Game");
+
+        assertDoesNotThrow(() -> {
+            int gameID = gameDAO.createGame(newGame);
+            GameData retrievedGame = gameDAO.getGame(gameID);
+
+            assertNotNull(retrievedGame, "Retrieved game should not be null");
+            assertEquals(gameID, retrievedGame.gameID());
+            assertEquals("whitePlayer", retrievedGame.whiteUsername());
+            assertEquals("blackPlayer", retrievedGame.blackUsername());
+            assertEquals("Test Game", retrievedGame.gameName());
+            System.out.println("Game retrieved successfully");
+        });
+    }
+    @Test
     public void testCreateUserSuccess() {
         UserData newUser = new UserData("test_user", "hashed_password_example", "test@example.com");
 

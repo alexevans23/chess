@@ -1,5 +1,6 @@
 package service;
 
+import dataaccess.MySQLGameDAO;
 import dataaccess.MySQLUserDAO;
 import dataaccess.MySQLAuthDAO;
 import dataaccess.DataAccessException;
@@ -12,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class DataAccessTests {
     private MySQLUserDAO userDAO;
     private MySQLAuthDAO authDAO;
+    private MySQLGameDAO gameDAO;
     @BeforeEach
     public void setUp() throws DataAccessException {
         userDAO = new MySQLUserDAO();
@@ -21,11 +23,16 @@ public class DataAccessTests {
         authDAO = new MySQLAuthDAO();
         authDAO.configureDatabase();
         authDAO.clear();
+
+        gameDAO = new MySQLGameDAO();
+        gameDAO.configureDatabase();
+        gameDAO.clear();
     }
     @AfterEach
     public void tearDown() throws DataAccessException {
         userDAO.clear();
         authDAO.clear();
+        gameDAO.clear();
     }
     @Test
     public void testCreateUserSuccess() {

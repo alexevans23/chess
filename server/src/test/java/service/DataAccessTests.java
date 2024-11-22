@@ -9,6 +9,8 @@ import model.UserData;
 import model.AuthData;
 import org.junit.jupiter.api.*;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DataAccessTests {
@@ -59,6 +61,19 @@ public class DataAccessTests {
             assertEquals("blackPlayer", retrievedGame.blackUsername());
             assertEquals("Test Game", retrievedGame.gameName());
             System.out.println("Game retrieved successfully");
+        });
+    }
+    @Test
+    public void testListGames() {
+        GameData game1 = new GameData(0, "white1", "black1", "Game 1");
+        GameData game2 = new GameData(0, "white2", "black2", "Game 2");
+
+        assertDoesNotThrow(() -> {
+            gameDAO.createGame(game1);
+            gameDAO.createGame(game2);
+            List<GameData> games = gameDAO.listGames();
+            assertEquals(2, games.size(), "There should be 2 games in the database");
+            System.out.println("Games listed successfully");
         });
     }
     @Test

@@ -62,6 +62,10 @@ public class DataAccessTests {
         });
     }
     @Test
+    public void testGetGameNotFound() {
+        assertThrows(DataAccessException.class, () -> gameDAO.getGame(9999), "Game not found as expected");
+    }
+    @Test
     public void testCreateUserSuccess() {
         UserData newUser = new UserData("test_user", "hashed_password_example", "test@example.com");
 

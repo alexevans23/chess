@@ -4,6 +4,7 @@ import dataaccess.MySQLGameDAO;
 import dataaccess.MySQLUserDAO;
 import dataaccess.MySQLAuthDAO;
 import dataaccess.DataAccessException;
+import model.GameData;
 import model.UserData;
 import model.AuthData;
 import org.junit.jupiter.api.*;
@@ -33,6 +34,16 @@ public class DataAccessTests {
         userDAO.clear();
         authDAO.clear();
         gameDAO.clear();
+    }
+    @Test
+    public void testCreateGameSuccess() {
+        GameData newGame = new GameData(0, "whitePlayer", "blackPlayer", "Test Game");
+
+        assertDoesNotThrow(() -> {
+            int gameID = gameDAO.createGame(newGame);
+            assertTrue(gameID > 0, "Game ID should be greater than 0");
+            System.out.println("Game created successfully with ID: " + gameID);
+        });
     }
     @Test
     public void testCreateUserSuccess() {
